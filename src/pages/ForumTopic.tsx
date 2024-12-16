@@ -21,9 +21,7 @@ const ForumTopic = () => {
         .from("forum_topics")
         .select(`
           *,
-          profiles:user_id (
-            username
-          )
+          profile:profiles!forum_topics_user_id_fkey(username)
         `)
         .eq("id", id)
         .single();
@@ -40,9 +38,7 @@ const ForumTopic = () => {
         .from("forum_comments")
         .select(`
           *,
-          profiles:user_id (
-            username
-          )
+          profile:profiles!forum_comments_user_id_fkey(username)
         `)
         .eq("topic_id", id)
         .order("created_at", { ascending: true });
@@ -182,7 +178,7 @@ const ForumTopic = () => {
               {topic.downvotes || 0}
             </Button>
             <span className="text-sm text-gray-500">
-              por {topic.profiles?.username}
+              por {topic.profile?.username}
             </span>
           </div>
 
@@ -195,7 +191,7 @@ const ForumTopic = () => {
                   <p className="text-gray-800">{comment.content}</p>
                   <div className="flex items-center gap-4 mt-2">
                     <span className="text-sm text-gray-500">
-                      por {comment.profiles?.username}
+                      por {comment.profile?.username}
                     </span>
                   </div>
                 </div>

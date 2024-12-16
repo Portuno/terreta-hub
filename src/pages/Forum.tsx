@@ -43,9 +43,7 @@ const Forum = () => {
         .from('forum_topics')
         .select(`
           *,
-          profiles:user_id (
-            username
-          )
+          profile:profiles!forum_topics_user_id_fkey(username)
         `);
 
       // Apply time filter
@@ -186,7 +184,7 @@ const Forum = () => {
                               {topic.downvotes || 0}
                             </span>
                             <span>
-                              por {topic.profiles?.username}
+                              por {topic.profile?.username}
                             </span>
                           </div>
                         </div>
