@@ -71,28 +71,100 @@ export type Database = {
       }
       products: {
         Row: {
+          collaborations: string[] | null
+          contact_email: string | null
           created_at: string
           description: string
+          gallery_urls: string[] | null
           id: string
+          is_draft: boolean | null
+          is_featured: boolean | null
+          launch_date: string | null
+          linkedin_url: string | null
+          logo_url: string | null
+          main_categories: string[]
+          metrics: Json | null
+          pricing_details: Json | null
+          pricing_type: string | null
+          problem_description: string | null
+          product_purpose: string[] | null
+          product_status: string
+          short_description: string
+          social_links: Json | null
+          sub_categories: string[] | null
+          target_audience: string[] | null
+          team_bio: string | null
+          team_location: string
+          team_members: Json | null
           title: string
           user_id: string
+          video_url: string | null
           views: number | null
+          website_url: string | null
         }
         Insert: {
+          collaborations?: string[] | null
+          contact_email?: string | null
           created_at?: string
           description: string
+          gallery_urls?: string[] | null
           id?: string
+          is_draft?: boolean | null
+          is_featured?: boolean | null
+          launch_date?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          main_categories?: string[]
+          metrics?: Json | null
+          pricing_details?: Json | null
+          pricing_type?: string | null
+          problem_description?: string | null
+          product_purpose?: string[] | null
+          product_status?: string
+          short_description: string
+          social_links?: Json | null
+          sub_categories?: string[] | null
+          target_audience?: string[] | null
+          team_bio?: string | null
+          team_location?: string
+          team_members?: Json | null
           title: string
           user_id: string
+          video_url?: string | null
           views?: number | null
+          website_url?: string | null
         }
         Update: {
+          collaborations?: string[] | null
+          contact_email?: string | null
           created_at?: string
           description?: string
+          gallery_urls?: string[] | null
           id?: string
+          is_draft?: boolean | null
+          is_featured?: boolean | null
+          launch_date?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          main_categories?: string[]
+          metrics?: Json | null
+          pricing_details?: Json | null
+          pricing_type?: string | null
+          problem_description?: string | null
+          product_purpose?: string[] | null
+          product_status?: string
+          short_description?: string
+          social_links?: Json | null
+          sub_categories?: string[] | null
+          target_audience?: string[] | null
+          team_bio?: string | null
+          team_location?: string
+          team_members?: Json | null
           title?: string
           user_id?: string
+          video_url?: string | null
           views?: number | null
+          website_url?: string | null
         }
         Relationships: []
       }
