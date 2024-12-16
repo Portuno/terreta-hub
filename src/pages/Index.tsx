@@ -8,12 +8,17 @@ const Index = () => {
       <div className="lg:ml-64">
         <main className="container mx-auto py-8 px-4">
           <div className="animate-fade-in">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Bienvenido a TorretaHub
-            </h1>
-            <p className="text-gray-600 mb-8">
-              La plataforma que impulsa la innovación y colaboración
-            </p>
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+                Impulsamos el talento de Valencia al futuro
+              </h1>
+              <p className="text-xl text-gray-600 mb-8">
+                Descubre, conecta y crece con la comunidad de innovación valenciana
+              </p>
+              <button className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                Crea tu proyecto
+              </button>
+            </div>
             
             <Stats />
             
