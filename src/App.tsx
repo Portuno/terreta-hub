@@ -9,6 +9,7 @@ import NewProduct from "./pages/NewProduct";
 import Resources from "./pages/Resources";
 import Events from "./pages/Events";
 import Forum from "./pages/Forum";
+import ForumTopic from "./pages/ForumTopic";
 import FAQ from "./pages/FAQ";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -30,6 +31,7 @@ function App() {
             <Route path="/recursos" element={<Resources />} />
             <Route path="/eventos" element={<Events />} />
             <Route path="/foro" element={<Forum />} />
+            <Route path="/foro/:id" element={<ForumTopic />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/perfil/:username" element={<Profile />} />
             <Route path="/configuraciones" element={<Settings />} />

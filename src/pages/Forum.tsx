@@ -7,31 +7,59 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Tag, Tags } from "lucide-react";
+import { Tag, Tags, ThumbsUp, ThumbsDown, MessageSquare, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Forum = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [timeFilter, setTimeFilter] = useState("all");
   const { toast } = useToast();
 
   const { data: topics, refetch } = useQuery({
-    queryKey: ['forum-topics'],
+    queryKey: ['forum-topics', timeFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('forum_topics')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*, profiles(username)');
+
+      // Aplicar filtro de tiempo
+      if (timeFilter !== 'all') {
+        const now = new Date();
+        let startDate = new Date();
+        
+        switch (timeFilter) {
+          case 'week':
+            startDate.setDate(now.getDate() - 7);
+            break;
+          case 'month':
+            startDate.setMonth(now.getMonth() - 1);
+            break;
+          case 'year':
+            startDate.setFullYear(now.getFullYear() - 1);
+            break;
+        }
+        
+        if (timeFilter !== 'all') {
+          query = query.gte('created_at', startDate.toISOString());
+        }
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
       return data;
     }
   });
-
-  const availableTags = [
-    "Derecho", "Finanzas", "Tecnología", "Salud", "Comunidad", "Arte"
-  ];
 
   const handleSubmit = async () => {
     try {
@@ -98,14 +126,58 @@ const Forum = () => {
               </Button>
             </div>
 
+            <div className="flex gap-4 mb-6">
+              <Select value={timeFilter} onValueChange={setTimeFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtrar por tiempo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <span className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Todos los tiempos
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="week">Última semana</SelectItem>
+                  <SelectItem value="month">Último mes</SelectItem>
+                  <SelectItem value="year">Último año</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="bg-white rounded-xl shadow-sm p-6">
               {topics && topics.length > 0 ? (
                 <div className="space-y-4">
                   {topics.map((topic) => (
-                    <div key={topic.id} className="border-b pb-4">
-                      <h3 className="text-lg font-semibold">{topic.title}</h3>
-                      <p className="text-gray-600 mt-2">{topic.content}</p>
-                    </div>
+                    <Link 
+                      to={`/foro/${topic.id}`} 
+                      key={topic.id} 
+                      className="block border-b pb-4 hover:bg-gray-50 p-4 rounded-lg transition-colors"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-lg font-semibold">{topic.title}</h3>
+                          <p className="text-gray-600 mt-2">{topic.content}</p>
+                          <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <MessageSquare className="h-4 w-4" />
+                              {topic.replies || 0} comentarios
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <ThumbsUp className="h-4 w-4" />
+                              {topic.upvotes || 0}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <ThumbsDown className="h-4 w-4" />
+                              {topic.downvotes || 0}
+                            </span>
+                            <span>
+                              por {topic.profiles?.username}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
