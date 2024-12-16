@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { ThumbsUp, ThumbsDown, MessageSquare, Clock } from "lucide-react";
+import { Tag, ThumbsUp, ThumbsDown, MessageSquare, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Select,
@@ -44,7 +44,7 @@ const Forum = () => {
         .from('forum_topics')
         .select(`
           *,
-          profile:profiles!forum_topics_user_id_fkey(username)
+          profile:profiles(username, id)
         `);
 
       // Apply time filter
@@ -70,7 +70,7 @@ const Forum = () => {
       const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as ForumTopic[];
     }
   });
 
@@ -228,7 +228,7 @@ const Forum = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
-                <Tags className="h-4 w-4" />
+                <Tag className="h-4 w-4" />
                 Etiquetas
               </label>
               <div className="flex flex-wrap gap-2">

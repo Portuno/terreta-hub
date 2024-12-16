@@ -22,13 +22,13 @@ const ForumTopic = () => {
         .from("forum_topics")
         .select(`
           *,
-          profile:profiles!forum_topics_user_id_fkey(username)
+          profile:profiles(username, id)
         `)
         .eq("id", id)
         .single();
 
       if (error) throw error;
-      return data;
+      return data as ForumTopic;
     },
   });
 
@@ -39,13 +39,13 @@ const ForumTopic = () => {
         .from("forum_comments")
         .select(`
           *,
-          profile:profiles!forum_comments_user_id_fkey(username)
+          profile:profiles(username, id)
         `)
         .eq("topic_id", id)
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as ForumComment[];
     },
   });
 
