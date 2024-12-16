@@ -5,10 +5,20 @@ import { PublicProfile } from "@/components/profile/PublicProfile";
 import { PrivateProfile } from "@/components/profile/PrivateProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const Profile = () => {
   const { username } = useParams();
-  const { data: session } = await supabase.auth.getSession();
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+    
+    getSession();
+  }, []);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", username],
