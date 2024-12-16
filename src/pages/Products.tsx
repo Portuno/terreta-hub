@@ -22,21 +22,11 @@ const Products = () => {
                 </div>
               </div>
               
-              {/* Placeholder for product grid */}
-              <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                    <div className="text-sm text-accent font-medium mb-2">Tecnología</div>
-                    <h3 className="text-lg font-semibold mb-2">Producto {i}</h3>
-                    <p className="text-gray-600 mb-4">
-                      Una breve descripción del producto y sus características principales.
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>Por: Usuario {i}</span>
-                      <button className="text-primary hover:text-primary-dark">Ver más</button>
-                    </div>
-                  </div>
-                ))}
+              {/* Empty product grid */}
+              <div className="col-span-2">
+                <p className="text-gray-500 text-center py-8">
+                  No hay productos disponibles en este momento.
+                </p>
               </div>
             </div>
           </div>
