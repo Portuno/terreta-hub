@@ -1,10 +1,18 @@
-import { useState } from "react";
-import { Menu, X, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, Search, User, Settings, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./AuthModal";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const menuItems = [
   { name: "Inicio", path: "/" },
@@ -18,7 +26,43 @@ const menuItems = [
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [session, setSession] = useState(null);
+  const [username, setUsername] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user?.id) {
+        fetchUsername(session.user.id);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session?.user?.id) {
+        fetchUsername(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUsername = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', userId)
+      .single();
+    
+    if (data) {
+      setUsername(data.username);
+    }
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -33,6 +77,7 @@ export const Navbar = () => {
         title: "¡Hasta pronto!",
         description: "Has cerrado sesión correctamente",
       });
+      setSession(null);
     }
   };
 
@@ -71,12 +116,48 @@ export const Navbar = () => {
               </Link>
             ))}
             
-            <Button
-              onClick={() => setShowAuthModal(true)}
-              className="bg-primary text-white hover:bg-primary-dark transition-colors"
-            >
-              Iniciar Sesión
-            </Button>
+            {session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary/10">
+                        {username ? username.substring(0, 2).toUpperCase() : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/perfil" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Ver Perfil</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/configuraciones" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Configuraciones</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleLogout}
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Cerrar Sesión</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                onClick={() => setShowAuthModal(true)}
+                className="bg-primary text-white hover:bg-primary-dark transition-colors"
+              >
+                Iniciar Sesión
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -115,15 +196,43 @@ export const Navbar = () => {
                 </Link>
               ))}
               
-              <Button
-                onClick={() => {
-                  setIsOpen(false);
-                  setShowAuthModal(true);
-                }}
-                className="w-full mt-2"
-              >
-                Iniciar Sesión
-              </Button>
+              {session ? (
+                <div className="space-y-2 pt-2">
+                  <Link
+                    to="/perfil"
+                    className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Ver Perfil
+                  </Link>
+                  <Link
+                    to="/configuraciones"
+                    className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Configuraciones
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => {
+                    setIsOpen(false);
+                    setShowAuthModal(true);
+                  }}
+                  className="w-full mt-2"
+                >
+                  Iniciar Sesión
+                </Button>
+              )}
             </div>
           </div>
         )}
