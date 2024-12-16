@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Tag, Tags, ThumbsUp, ThumbsDown, MessageSquare, Clock } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Select,
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { ForumTopic } from "@/types/forum";
 
 // Define available tags
 const availableTags = [
@@ -36,7 +37,7 @@ const Forum = () => {
   const [timeFilter, setTimeFilter] = useState("all");
   const { toast } = useToast();
 
-  const { data: topics, refetch } = useQuery({
+  const { data: topics, refetch } = useQuery<ForumTopic[]>({
     queryKey: ['forum-topics', timeFilter],
     queryFn: async () => {
       let query = supabase

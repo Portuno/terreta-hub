@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-react";
 import { useState } from "react";
+import type { ForumTopic, ForumComment } from "@/types/forum";
 
 const ForumTopic = () => {
   const { id } = useParams();
@@ -14,7 +15,7 @@ const ForumTopic = () => {
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState("");
 
-  const { data: topic, isLoading: topicLoading } = useQuery({
+  const { data: topic } = useQuery<ForumTopic>({
     queryKey: ["forum-topic", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -31,7 +32,7 @@ const ForumTopic = () => {
     },
   });
 
-  const { data: comments, isLoading: commentsLoading } = useQuery({
+  const { data: comments } = useQuery<ForumComment[]>({
     queryKey: ["forum-comments", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -125,21 +126,6 @@ const ForumTopic = () => {
       });
     },
   });
-
-  if (topicLoading || commentsLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-16 container mx-auto px-4">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (!topic) {
     return (
