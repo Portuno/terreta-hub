@@ -1,13 +1,22 @@
 import { Navbar } from "../components/Navbar";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Products = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-16">
         <main className="container mx-auto py-8 px-4">
           <div className="animate-fade-in">
-            <h1 className="text-4xl font-bold text-foreground mb-6">Productos</h1>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-4xl font-bold text-foreground">Productos</h1>
+              <Button onClick={() => navigate("/productos/nuevo")} className="bg-primary hover:bg-primary-dark text-white font-bold">
+                Crear Proyecto
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Placeholder for product filters */}
               <div className="col-span-1 bg-white rounded-xl shadow-sm p-6">
