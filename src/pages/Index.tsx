@@ -1,13 +1,18 @@
 import { Navbar } from "../components/Navbar";
-import { Stats } from "../components/Stats";
+import { TopProducts } from "../components/TopProducts";
+import { TrendingTopics } from "../components/TrendingTopics";
+import { UpcomingEvent } from "../components/UpcomingEvent";
+import { Button } from "../components/ui/button";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-16"> {/* Added padding-top to account for fixed navbar */}
+      <div className="pt-16">
         <main className="container mx-auto py-8 px-4">
           <div className="animate-fade-in">
+            {/* Hero Section */}
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                 Impulsamos el talento de Valencia al futuro
@@ -15,32 +20,35 @@ const Index = () => {
               <p className="text-xl text-gray-600 mb-8">
                 Descubre, conecta y crece con la comunidad de innovación valenciana
               </p>
-              <button className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-lg transition-colors">
-                Crea tu proyecto
-              </button>
+              <Button asChild size="lg" className="bg-primary hover:bg-primary-dark">
+                <Link to="/productos/nuevo">
+                  Crea tu proyecto
+                </Link>
+              </Button>
             </div>
-            
-            <Stats />
-            
-            <section className="mt-12">
-              <h2 className="text-2xl font-semibold mb-6">Proyectos Destacados</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                    <div className="text-sm text-accent font-medium mb-2">Tecnología</div>
-                    <h3 className="text-lg font-semibold mb-2">Proyecto {i}</h3>
-                    <p className="text-gray-600 mb-4">
-                      Una breve descripción del proyecto y sus objetivos principales.
-                    </p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span>12 colaboradores</span>
-                      <span className="mx-2">•</span>
-                      <span>Actualizado hace 2 días</span>
-                    </div>
-                  </div>
-                ))}
+
+            {/* Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-8">
+                <section>
+                  <h2 className="text-2xl font-semibold mb-6">Top Productos de la Semana</h2>
+                  <TopProducts />
+                </section>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-6">Próximo Evento</h2>
+                  <UpcomingEvent />
+                </section>
               </div>
-            </section>
+
+              {/* Right Column */}
+              <div>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-6">Temas Trending</h2>
+                  <TrendingTopics />
+                </section>
+              </div>
+            </div>
           </div>
         </main>
       </div>

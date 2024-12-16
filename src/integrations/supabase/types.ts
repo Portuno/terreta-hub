@@ -9,6 +9,93 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      events: {
+        Row: {
+          created_at: string
+          description: string
+          event_date: string
+          id: string
+          location: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          event_date: string
+          id?: string
+          location: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          event_date?: string
+          id?: string
+          location?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      forum_topics: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          replies: number | null
+          title: string
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          replies?: number | null
+          title: string
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          replies?: number | null
+          title?: string
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          title: string
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          title: string
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          title?: string
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
