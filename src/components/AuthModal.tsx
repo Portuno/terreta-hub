@@ -1,136 +1,80 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "./ui/use-toast";
 
-export const AuthModal = ({
-  isOpen,
-  onClose,
-}: {
+interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-}) => {
-  const [showUsernameForm, setShowUsernameForm] = useState(false);
-  const [username, setUsername] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+}
+
+export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleUsernameSubmit = async () => {
-    try {
-      setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error("No user found");
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ username })
-        .eq('id', user.id);
-
-      if (error) {
-        if (error.code === '23505') { // Unique violation
-          toast({
-            title: "Error",
-            description: "Este nombre de usuario ya está en uso",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw error;
-      }
-
+  // Custom error handler for auth events
+  const handleAuthError = (error: Error) => {
+    setIsLoading(false);
+    
+    // Check if it's a rate limit error
+    if (error.message.includes('over_email_send_rate_limit')) {
       toast({
-        title: "¡Éxito!",
-        description: "Tu nombre de usuario ha sido guardado",
-      });
-      onClose();
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Hubo un error al guardar tu nombre de usuario",
+        title: "Por favor, espera un momento",
+        description: "Por seguridad, debes esperar 16 segundos antes de intentar nuevamente.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+    } else {
+      toast({
+        title: "Error",
+        description: "Hubo un problema al procesar tu solicitud. Por favor, intenta nuevamente.",
+        variant: "destructive",
+      });
     }
   };
 
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN') {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('id', session?.user.id)
-        .single();
-
-      if (!profile?.username) {
-        setShowUsernameForm(true);
-      } else {
-        onClose();
-      }
-    }
-  });
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {showUsernameForm ? "Elige tu nombre de usuario" : "Iniciar sesión"}
-          </DialogTitle>
-        </DialogHeader>
-        
-        {showUsernameForm ? (
-          <div className="space-y-4">
-            <Input
-              placeholder="Nombre de usuario"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <Button 
-              onClick={handleUsernameSubmit} 
-              disabled={!username.trim() || isLoading}
-              className="w-full"
-            >
-              {isLoading ? "Guardando..." : "Guardar nombre de usuario"}
-            </Button>
-          </div>
-        ) : (
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#6E59A5',
-                    brandAccent: '#4A3B80',
-                  },
-                },
+      <DialogContent className="sm:max-w-[425px]">
+        <Auth
+          supabaseClient={supabase}
+          appearance={{
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: '#000000',
+                  brandAccent: '#333333',
+                }
+              }
+            }
+          }}
+          theme="light"
+          providers={["google"]}
+          onError={handleAuthError}
+          redirectTo={window.location.origin}
+          localization={{
+            variables: {
+              sign_up: {
+                email_label: "Correo electrónico",
+                password_label: "Contraseña",
+                button_label: "Registrarse",
+                loading_button_label: "Registrando...",
+                social_provider_text: "Iniciar sesión con {{provider}}",
+                link_text: "¿No tienes una cuenta? Regístrate",
               },
-            }}
-            providers={["google"]}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: "Correo electrónico",
-                  password_label: "Contraseña",
-                  button_label: "Iniciar sesión",
-                },
-                sign_up: {
-                  email_label: "Correo electrónico",
-                  password_label: "Contraseña",
-                  button_label: "Registrarse",
-                },
+              sign_in: {
+                email_label: "Correo electrónico",
+                password_label: "Contraseña",
+                button_label: "Iniciar sesión",
+                loading_button_label: "Iniciando sesión...",
+                social_provider_text: "Iniciar sesión con {{provider}}",
+                link_text: "¿Ya tienes una cuenta? Inicia sesión",
               },
-            }}
-          />
-        )}
+            },
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
