@@ -17,6 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Define available tags
+const availableTags = [
+  "General",
+  "Tecnología",
+  "Negocios",
+  "Marketing",
+  "Diseño",
+  "Desarrollo",
+  "Emprendimiento",
+];
+
 const Forum = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -30,9 +41,14 @@ const Forum = () => {
     queryFn: async () => {
       let query = supabase
         .from('forum_topics')
-        .select('*, profiles(username)');
+        .select(`
+          *,
+          profiles:user_id (
+            username
+          )
+        `);
 
-      // Aplicar filtro de tiempo
+      // Apply time filter
       if (timeFilter !== 'all') {
         const now = new Date();
         let startDate = new Date();
@@ -49,9 +65,7 @@ const Forum = () => {
             break;
         }
         
-        if (timeFilter !== 'all') {
-          query = query.gte('created_at', startDate.toISOString());
-        }
+        query = query.gte('created_at', startDate.toISOString());
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
