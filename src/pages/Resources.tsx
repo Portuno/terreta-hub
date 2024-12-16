@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navbar } from "../components/Navbar";
-import { Sidebar } from "../components/ui/sidebar";
+import { SidebarProvider } from "../components/ui/sidebar";
+import { Sidebar } from "../components/Sidebar";
 import { BookOpen, GraduationCap, Link, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -98,10 +99,11 @@ const Resources = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-16">
-        <Sidebar />
-        <div className="lg:ml-64">
-          <main className="container mx-auto py-8 px-4">
+      <SidebarProvider>
+        <div className="pt-16">
+          <Sidebar />
+          <div className="lg:ml-64">
+            <main className="container mx-auto py-8 px-4">
             <div className="animate-fade-in">
               <div className="flex justify-between items-center mb-6">
                 <h1 className="text-4xl font-bold text-foreground">Recursos</h1>
@@ -239,9 +241,10 @@ const Resources = () => {
                 </div>
               </div>
             </div>
-          </main>
+            </main>
+          </div>
         </div>
-      </div>
+      </SidebarProvider>
     </div>
   );
 };
