@@ -1,5 +1,5 @@
 import { Sidebar } from "../components/Sidebar";
-import { BookOpen, Graduation, Link } from "lucide-react";
+import { BookOpen, GraduationCap, Link } from "lucide-react";
 
 const Resources = () => {
   return (
@@ -30,7 +30,7 @@ const Resources = () => {
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="p-2 bg-accent/10 rounded-lg">
-                    <Graduation className="w-6 h-6 text-accent" />
+                    <GraduationCap className="w-6 h-6 text-accent" />
                   </div>
                   <h2 className="text-xl font-semibold">Cursos</h2>
                 </div>
