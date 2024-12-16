@@ -1,11 +1,43 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Sidebar } from "../components/Sidebar";
+import { Stats } from "../components/Stats";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background">
+      <Sidebar />
+      <div className="lg:ml-64">
+        <main className="container mx-auto py-8 px-4">
+          <div className="animate-fade-in">
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Bienvenido a TorretaHub
+            </h1>
+            <p className="text-gray-600 mb-8">
+              La plataforma que impulsa la innovación y colaboración
+            </p>
+            
+            <Stats />
+            
+            <section className="mt-12">
+              <h2 className="text-2xl font-semibold mb-6">Proyectos Destacados</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <div className="text-sm text-accent font-medium mb-2">Tecnología</div>
+                    <h3 className="text-lg font-semibold mb-2">Proyecto {i}</h3>
+                    <p className="text-gray-600 mb-4">
+                      Una breve descripción del proyecto y sus objetivos principales.
+                    </p>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <span>12 colaboradores</span>
+                      <span className="mx-2">•</span>
+                      <span>Actualizado hace 2 días</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </main>
       </div>
     </div>
   );
