@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      blocked_users: {
+        Row: {
+          blocked_user_id: string | null
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          blocked_user_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          blocked_user_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
@@ -280,25 +301,46 @@ export type Database = {
       }
       profiles: {
         Row: {
+          achievements: Json | null
+          avatar_url: string | null
+          bio: string | null
           created_at: string
           id: string
+          interests: string[] | null
+          location: string | null
+          notification_settings: Json | null
           role: string
           updated_at: string
           username: string
+          visibility_settings: Json | null
         }
         Insert: {
+          achievements?: Json | null
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           id: string
+          interests?: string[] | null
+          location?: string | null
+          notification_settings?: Json | null
           role?: string
           updated_at?: string
           username: string
+          visibility_settings?: Json | null
         }
         Update: {
+          achievements?: Json | null
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           id?: string
+          interests?: string[] | null
+          location?: string | null
+          notification_settings?: Json | null
           role?: string
           updated_at?: string
           username?: string
+          visibility_settings?: Json | null
         }
         Relationships: []
       }
@@ -334,7 +376,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_username: {
+        Args: {
+          new_username: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

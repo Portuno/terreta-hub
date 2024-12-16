@@ -10,6 +10,8 @@ import Resources from "./pages/Resources";
 import Events from "./pages/Events";
 import Forum from "./pages/Forum";
 import FAQ from "./pages/FAQ";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import { useState } from "react";
 
 function App() {
@@ -29,6 +31,8 @@ function App() {
             <Route path="/eventos" element={<Events />} />
             <Route path="/foro" element={<Forum />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/perfil/:username" element={<Profile />} />
+            <Route path="/configuraciones" element={<Settings />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
