@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Menu, X, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { AuthModal } from "./AuthModal";
+import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
 
 const menuItems = [
   { name: "Inicio", path: "/" },
@@ -13,7 +17,24 @@ const menuItems = [
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showAuthOptions, setShowAuthOptions] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo cerrar sesión",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "¡Hasta pronto!",
+        description: "Has cerrado sesión correctamente",
+      });
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
@@ -50,26 +71,12 @@ export const Navbar = () => {
               </Link>
             ))}
             
-            {/* Login Button with Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowAuthOptions(!showAuthOptions)}
-                className="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-dark transition-colors"
-              >
-                Iniciar Sesión
-              </button>
-              
-              {showAuthOptions && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200">
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Iniciar Sesión
-                  </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Registrarse
-                  </button>
-                </div>
-              )}
-            </div>
+            <Button
+              onClick={() => setShowAuthModal(true)}
+              className="bg-primary text-white hover:bg-primary-dark transition-colors"
+            >
+              Iniciar Sesión
+            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -108,19 +115,24 @@ export const Navbar = () => {
                 </Link>
               ))}
               
-              {/* Mobile login buttons */}
-              <div className="pt-2 space-y-1">
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                  Iniciar Sesión
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                  Registrarse
-                </button>
-              </div>
+              <Button
+                onClick={() => {
+                  setIsOpen(false);
+                  setShowAuthModal(true);
+                }}
+                className="w-full mt-2"
+              >
+                Iniciar Sesión
+              </Button>
             </div>
           </div>
         )}
       </div>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </nav>
   );
 };
