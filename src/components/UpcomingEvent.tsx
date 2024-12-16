@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export const UpcomingEvent = () => {
-  const { data: event, isLoading } = useQuery({
+  const { data: events, isLoading } = useQuery({
     queryKey: ["upcomingEvent"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -14,10 +14,9 @@ export const UpcomingEvent = () => {
         .select("*")
         .gte("event_date", new Date().toISOString())
         .order("event_date", { ascending: true })
-        .limit(1)
-        .single();
+        .limit(1);
       
-      if (error && error.code !== "PGRST116") throw error;
+      if (error) throw error;
       return data;
     },
   });
@@ -26,13 +25,15 @@ export const UpcomingEvent = () => {
     return <div className="h-48 bg-gray-100 animate-pulse rounded-lg"></div>;
   }
 
-  if (!event) {
+  if (!events || events.length === 0) {
     return (
       <div className="p-6 bg-white rounded-lg shadow-sm text-center">
         <p className="text-gray-500">No hay eventos próximos</p>
       </div>
     );
   }
+
+  const event = events[0];
 
   return (
     <Link
