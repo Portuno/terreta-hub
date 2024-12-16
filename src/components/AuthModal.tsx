@@ -14,26 +14,6 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Custom error handler for auth events
-  const handleAuthError = (error: Error) => {
-    setIsLoading(false);
-    
-    // Check if it's a rate limit error
-    if (error.message.includes('over_email_send_rate_limit')) {
-      toast({
-        title: "Por favor, espera un momento",
-        description: "Por seguridad, debes esperar 16 segundos antes de intentar nuevamente.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Hubo un problema al procesar tu solicitud. Por favor, intenta nuevamente.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -52,7 +32,6 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           }}
           theme="light"
           providers={["google"]}
-          onError={handleAuthError}
           redirectTo={window.location.origin}
           localization={{
             variables: {
@@ -73,6 +52,22 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 link_text: "¿Ya tienes una cuenta? Inicia sesión",
               },
             },
+          }}
+          // Handle errors through the onAuthStateChange event in your app
+          onAuthStateChange={(event, session) => {
+            if (event === "SIGNED_IN") {
+              onClose();
+            } else if (event === "USER_UPDATED") {
+              console.log("user updated", session);
+            } else if (event === "SIGNED_OUT") {
+              console.log("signed out");
+            } else if (event === "ERROR") {
+              toast({
+                title: "Error",
+                description: "Hubo un problema al procesar tu solicitud. Por favor, intenta nuevamente.",
+                variant: "destructive",
+              });
+            }
           }}
         />
       </DialogContent>
