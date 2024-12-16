@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search, User, Settings, LogOut } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./AuthModal";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserMenu } from "./UserMenu";
+import { MobileMenu } from "./MobileMenu";
 
 const menuItems = [
   { name: "Inicio", path: "/" },
@@ -117,39 +111,7 @@ export const Navbar = () => {
             ))}
             
             {session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary/10">
-                        {username ? username.substring(0, 2).toUpperCase() : "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuItem asChild>
-                    <Link to="/perfil" className="flex items-center">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Ver Perfil</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/configuraciones" className="flex items-center">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Configuraciones</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleLogout}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar Sesión</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <UserMenu username={username} onLogout={handleLogout} />
             ) : (
               <Button
                 onClick={() => setShowAuthModal(true)}
@@ -172,70 +134,15 @@ export const Navbar = () => {
         </div>
 
         {/* Mobile menu */}
-        {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Mobile search */}
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="search"
-                  placeholder="Buscar..."
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
-              </div>
-              
-              {menuItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              
-              {session ? (
-                <div className="space-y-2 pt-2">
-                  <Link
-                    to="/perfil"
-                    className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Ver Perfil
-                  </Link>
-                  <Link
-                    to="/configuraciones"
-                    className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Configuraciones
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
-              ) : (
-                <Button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setShowAuthModal(true);
-                  }}
-                  className="w-full mt-2"
-                >
-                  Iniciar Sesión
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+        <MobileMenu
+          isOpen={isOpen}
+          menuItems={menuItems}
+          session={session}
+          username={username}
+          setShowAuthModal={setShowAuthModal}
+          handleLogout={handleLogout}
+          setIsOpen={setIsOpen}
+        />
       </div>
 
       <AuthModal 

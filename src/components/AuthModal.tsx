@@ -12,7 +12,6 @@ interface AuthModalProps {
 
 export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -52,22 +51,6 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 link_text: "¿Ya tienes una cuenta? Inicia sesión",
               },
             },
-          }}
-          // Handle errors through the onAuthStateChange event in your app
-          onAuthStateChange={(event, session) => {
-            if (event === "SIGNED_IN") {
-              onClose();
-            } else if (event === "USER_UPDATED") {
-              console.log("user updated", session);
-            } else if (event === "SIGNED_OUT") {
-              console.log("signed out");
-            } else if (event === "ERROR") {
-              toast({
-                title: "Error",
-                description: "Hubo un problema al procesar tu solicitud. Por favor, intenta nuevamente.",
-                variant: "destructive",
-              });
-            }
           }}
         />
       </DialogContent>
