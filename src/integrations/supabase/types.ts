@@ -39,33 +39,143 @@ export type Database = {
         }
         Relationships: []
       }
-      forum_topics: {
+      forum_comments: {
         Row: {
           content: string
           created_at: string
           id: string
+          media_urls: string[] | null
+          topic_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          media_urls?: string[] | null
+          topic_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          media_urls?: string[] | null
+          topic_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_comments_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          status: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          status?: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          status?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      forum_topics: {
+        Row: {
+          content: string
+          created_at: string
+          downvotes: number | null
+          id: string
+          is_pinned: boolean | null
+          last_activity_at: string | null
+          media_urls: string[] | null
           replies: number | null
           title: string
+          upvotes: number | null
           user_id: string
           views: number | null
         }
         Insert: {
           content: string
           created_at?: string
+          downvotes?: number | null
           id?: string
+          is_pinned?: boolean | null
+          last_activity_at?: string | null
+          media_urls?: string[] | null
           replies?: number | null
           title: string
+          upvotes?: number | null
           user_id: string
           views?: number | null
         }
         Update: {
           content?: string
           created_at?: string
+          downvotes?: number | null
           id?: string
+          is_pinned?: boolean | null
+          last_activity_at?: string | null
+          media_urls?: string[] | null
           replies?: number | null
           title?: string
+          upvotes?: number | null
           user_id?: string
           views?: number | null
+        }
+        Relationships: []
+      }
+      forum_votes: {
+        Row: {
+          created_at: string
+          id: string
+          target_id: string
+          target_type: string
+          user_id: string
+          vote_type: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          target_id: string
+          target_type: string
+          user_id: string
+          vote_type: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+          vote_type?: boolean
         }
         Relationships: []
       }
