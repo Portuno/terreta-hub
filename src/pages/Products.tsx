@@ -1,10 +1,10 @@
-import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
 
 const Products = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="lg:ml-64">
+      <Navbar />
+      <div className="pt-16">
         <main className="container mx-auto py-8 px-4">
           <div className="animate-fade-in">
             <h1 className="text-4xl font-bold text-foreground mb-6">Productos</h1>

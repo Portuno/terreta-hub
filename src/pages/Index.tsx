@@ -1,11 +1,11 @@
-import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
 import { Stats } from "../components/Stats";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="lg:ml-64">
+      <Navbar />
+      <div className="pt-16"> {/* Added padding-top to account for fixed navbar */}
         <main className="container mx-auto py-8 px-4">
           <div className="animate-fade-in">
             <div className="text-center mb-12">
