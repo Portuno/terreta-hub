@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Tag, ThumbsUp, ThumbsDown, MessageSquare, Clock } from "lucide-react";
+import { Tag, ThumbsUp, ThumbsDown, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Select,
@@ -16,9 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ForumTopic } from "@/types/forum";
 
-// Define available tags
 const availableTags = [
   "General",
   "Tecnología",
@@ -44,7 +42,7 @@ const Forum = () => {
         .from('forum_topics')
         .select(`
           *,
-          profile:profiles(username, id)
+          profile:profiles(username)
         `);
 
       // Apply time filter
@@ -70,7 +68,7 @@ const Forum = () => {
       const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as unknown as ForumTopic[];
+      return data;
     }
   });
 
@@ -118,14 +116,6 @@ const Forum = () => {
     }
   };
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    );
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -145,12 +135,7 @@ const Forum = () => {
                   <SelectValue placeholder="Filtrar por tiempo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">
-                    <span className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Todos los tiempos
-                    </span>
-                  </SelectItem>
+                  <SelectItem value="all">Todos los tiempos</SelectItem>
                   <SelectItem value="week">Última semana</SelectItem>
                   <SelectItem value="month">Último mes</SelectItem>
                   <SelectItem value="year">Último año</SelectItem>
@@ -225,25 +210,6 @@ const Forum = () => {
                 onChange={(e) => setContent(e.target.value)}
                 rows={5}
               />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Etiquetas
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => (
-                  <Button
-                    key={tag}
-                    variant={selectedTags.includes(tag) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => toggleTag(tag)}
-                  >
-                    <Tag className="h-4 w-4 mr-2" />
-                    {tag}
-                  </Button>
-                ))}
-              </div>
             </div>
           </div>
           <DialogFooter>
