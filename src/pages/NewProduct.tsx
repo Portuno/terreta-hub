@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { CategorySelector } from "@/components/products/CategorySelector";
+import { SubcategoryInput } from "@/components/products/SubcategoryInput";
 
 const mainCategories = [
   "Tecnología",
@@ -65,9 +65,12 @@ const NewProduct = () => {
     title: "",
     short_description: "",
     description: "",
-    main_categories: [],
-    sub_categories: [],
+    main_categories: [] as string[],
+    sub_categories: [] as string[],
     team_location: "Valencia",
+    website_url: "",
+    linkedin_url: "",
+    logo_url: "",
   });
 
   const handleMainCategoryChange = (category: string) => {
@@ -116,6 +119,42 @@ const NewProduct = () => {
         sub_categories: [...currentSubCategories, category]
       };
     });
+  };
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const { error: uploadError, data } = await supabase.storage
+        .from('products')
+        .upload(`logos/${fileName}`, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('products')
+        .getPublicUrl(`logos/${fileName}`);
+
+      setFormData(prev => ({
+        ...prev,
+        logo_url: publicUrl
+      }));
+
+      toast({
+        title: "Logo subido correctamente",
+        description: "El logo se ha guardado correctamente",
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error al subir el logo",
+        description: "No se pudo subir el logo, intenta de nuevo",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -181,6 +220,25 @@ const NewProduct = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium mb-2">
+                  Logo del producto
+                </label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="mb-2"
+                />
+                {formData.logo_url && (
+                  <img
+                    src={formData.logo_url}
+                    alt="Logo preview"
+                    className="w-32 h-32 object-contain border rounded-lg"
+                  />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
                   Nombre del producto
                 </label>
                 <Input
@@ -218,63 +276,40 @@ const NewProduct = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Categorías principales (mínimo 1, máximo 6)
+                  Sitio web
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-2">
-                  {mainCategories.map((category) => (
-                    <Button
-                      key={category}
-                      type="button"
-                      variant={formData.main_categories.includes(category) ? "default" : "outline"}
-                      onClick={() => handleMainCategoryChange(category)}
-                      className="justify-start"
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.main_categories.map((category) => (
-                    <Badge key={category} variant="secondary">
-                      {category}
-                      <X
-                        className="ml-1 h-3 w-3 cursor-pointer"
-                        onClick={() => handleMainCategoryChange(category)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
+                <Input
+                  type="url"
+                  value={formData.website_url}
+                  onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                  placeholder="https://ejemplo.com"
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Subcategorías (máximo 6)
+                  LinkedIn
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-2">
-                  {subCategories.map((category) => (
-                    <Button
-                      key={category}
-                      type="button"
-                      variant={formData.sub_categories.includes(category) ? "default" : "outline"}
-                      onClick={() => handleSubCategoryChange(category)}
-                      className="justify-start text-sm"
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.sub_categories.map((category) => (
-                    <Badge key={category} variant="secondary">
-                      {category}
-                      <X
-                        className="ml-1 h-3 w-3 cursor-pointer"
-                        onClick={() => handleSubCategoryChange(category)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
+                <Input
+                  type="url"
+                  value={formData.linkedin_url}
+                  onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                  placeholder="https://linkedin.com/in/usuario"
+                />
               </div>
+
+              <CategorySelector
+                title="Categorías principales (mínimo 1, máximo 6)"
+                categories={mainCategories}
+                selectedCategories={formData.main_categories}
+                onCategoryChange={handleMainCategoryChange}
+              />
+
+              <SubcategoryInput
+                subCategories={subCategories}
+                selectedSubCategories={formData.sub_categories}
+                onSubCategoryChange={handleSubCategoryChange}
+              />
 
               <div className="flex justify-end space-x-4">
                 <Button
