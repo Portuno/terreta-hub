@@ -12,6 +12,11 @@ interface Product {
   title: string;
   description: string;
   short_description: string;
+  website_url: string | null;
+  linkedin_url: string | null;
+  main_categories: string[];
+  sub_categories: string[] | null;
+  logo_url: string | null;
   profile: {
     username: string;
     avatar_url: string | null;

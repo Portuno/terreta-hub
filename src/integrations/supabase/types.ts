@@ -445,6 +445,8 @@ export type Database = {
           location: string | null
           notification_settings: Json | null
           role: string
+          total_downvotes: number | null
+          total_upvotes: number | null
           updated_at: string
           username: string
           visibility_settings: Json | null
@@ -459,6 +461,8 @@ export type Database = {
           location?: string | null
           notification_settings?: Json | null
           role?: string
+          total_downvotes?: number | null
+          total_upvotes?: number | null
           updated_at?: string
           username: string
           visibility_settings?: Json | null
@@ -473,6 +477,8 @@ export type Database = {
           location?: string | null
           notification_settings?: Json | null
           role?: string
+          total_downvotes?: number | null
+          total_upvotes?: number | null
           updated_at?: string
           username?: string
           visibility_settings?: Json | null

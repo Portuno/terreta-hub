@@ -3,6 +3,9 @@ import { ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Comment {
   id: string;
@@ -28,6 +31,43 @@ export const ProductComments = ({
   commentSort, 
   setCommentSort 
 }: ProductCommentsProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const voteMutation = useMutation({
+    mutationFn: async ({ commentId, voteType }: { commentId: string; voteType: boolean }) => {
+      const { error: deleteError } = await supabase
+        .from("product_comment_votes")
+        .delete()
+        .eq("comment_id", commentId);
+
+      if (deleteError) throw deleteError;
+
+      const { error: insertError } = await supabase
+        .from("product_comment_votes")
+        .insert([
+          {
+            comment_id: commentId,
+            vote_type: voteType,
+          },
+        ]);
+
+      if (insertError) throw insertError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["product-comments"] });
+      toast({
+        description: "Tu voto ha sido registrado",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        description: "Error al registrar tu voto",
+      });
+    },
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -88,15 +128,23 @@ export const ProductComments = ({
                       {comment.profile?.username}
                     </Link>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => voteMutation.mutate({ commentId: comment.id, voteType: true })}
+                    >
                       <ArrowUp size={16} />
-                      {comment.upvotes || 0}
-                    </span>
-                    <span className="flex items-center gap-1">
+                      <span className="ml-1">{comment.upvotes || 0}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => voteMutation.mutate({ commentId: comment.id, voteType: false })}
+                    >
                       <ArrowDown size={16} />
-                      {comment.downvotes || 0}
-                    </span>
+                      <span className="ml-1">{comment.downvotes || 0}</span>
+                    </Button>
                   </div>
                 </div>
                 <p className="text-gray-600">{comment.content}</p>
