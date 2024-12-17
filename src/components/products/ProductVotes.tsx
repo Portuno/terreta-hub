@@ -14,6 +14,7 @@ interface ProductVotesProps {
 export const ProductVotes = ({ productId, userVote, upvotes, downvotes }: ProductVotesProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const voteBalance = upvotes - downvotes;
 
   const voteMutation = useMutation({
     mutationFn: async ({ voteType }: { voteType: boolean }) => {
@@ -58,28 +59,21 @@ export const ProductVotes = ({ productId, userVote, upvotes, downvotes }: Produc
         variant="outline"
         size="icon"
         onClick={() => voteMutation.mutate({ voteType: true })}
-        className={userVote === true ? "bg-green-100" : ""}
+        className={userVote === true ? "text-green-600" : ""}
       >
         <ArrowUp />
       </Button>
+      <span className={`text-lg font-medium ${voteBalance > 0 ? 'text-green-600' : voteBalance < 0 ? 'text-red-600' : ''}`}>
+        {voteBalance}
+      </span>
       <Button
         variant="outline"
         size="icon"
         onClick={() => voteMutation.mutate({ voteType: false })}
-        className={userVote === false ? "bg-red-100" : ""}
+        className={userVote === false ? "text-red-600" : ""}
       >
         <ArrowDown />
       </Button>
-      <div className="flex gap-4 text-sm text-gray-500">
-        <span className="flex items-center gap-1">
-          <ArrowUp className="text-green-500" size={16} />
-          {upvotes || 0}
-        </span>
-        <span className="flex items-center gap-1">
-          <ArrowDown className="text-red-500" size={16} />
-          {downvotes || 0}
-        </span>
-      </div>
     </div>
   );
 };

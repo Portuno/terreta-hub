@@ -1,13 +1,11 @@
-import { Link } from "react-router-dom";
-import { ArrowUp, ArrowDown, Loader2, MessageSquare, ThumbsUp, ThumbsDown, Smile } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { CommentForm } from "./CommentForm";
+import { SingleComment } from "./SingleComment";
 
 interface Comment {
   id: string;
@@ -30,17 +28,15 @@ interface ProductCommentsProps {
   productId: string;
 }
 
-export const ProductComments = ({ 
-  comments, 
-  isLoading, 
-  commentSort, 
+export const ProductComments = ({
+  comments,
+  isLoading,
+  commentSort,
   setCommentSort,
   productId
 }: ProductCommentsProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [newComment, setNewComment] = useState("");
 
   const commentMutation = useMutation({
     mutationFn: async ({ content, parentId }: { content: string; parentId?: string }) => {
@@ -61,8 +57,6 @@ export const ProductComments = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-comments"] });
-      setNewComment("");
-      setReplyingTo(null);
       toast({
         description: "Comentario publicado exitosamente",
       });
@@ -101,153 +95,16 @@ export const ProductComments = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-comments"] });
       toast({
-        description: "Tu voto ha sido registrado",
+        description: "Voto registrado exitosamente",
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        description: "Error al registrar tu voto",
+        description: "Error al registrar el voto",
       });
     },
   });
-
-  const reactionMutation = useMutation({
-    mutationFn: async ({ commentId, reactionType }: { commentId: string; reactionType: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const { error } = await supabase
-        .from("product_comment_reactions")
-        .upsert({
-          comment_id: commentId,
-          user_id: user.id,
-          reaction_type: reactionType,
-        });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product-comments"] });
-      toast({
-        description: "Reacción registrada",
-      });
-    },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        description: "Error al registrar la reacción",
-      });
-    },
-  });
-
-  const renderComment = (comment: Comment) => (
-    <div
-      key={comment.id}
-      className="border rounded-lg p-4 space-y-2"
-      style={{ marginLeft: `${comment.depth * 2}rem` }}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={comment.profile?.avatar_url || undefined}
-              alt={comment.profile?.username}
-            />
-            <AvatarFallback>
-              {comment.profile?.username.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <Link
-            to={`/perfil/${comment.profile?.username}`}
-            className="font-medium hover:underline"
-          >
-            {comment.profile?.username}
-          </Link>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => voteMutation.mutate({ commentId: comment.id, voteType: true })}
-          >
-            <ArrowUp size={16} />
-            <span className="ml-1">{comment.upvotes || 0}</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => voteMutation.mutate({ commentId: comment.id, voteType: false })}
-          >
-            <ArrowDown size={16} />
-            <span className="ml-1">{comment.downvotes || 0}</span>
-          </Button>
-        </div>
-      </div>
-      <p className="text-gray-600">{comment.content}</p>
-      <div className="flex items-center gap-2 pt-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-        >
-          <MessageSquare size={16} className="mr-1" />
-          Responder
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => reactionMutation.mutate({ commentId: comment.id, reactionType: "like" })}
-        >
-          <ThumbsUp size={16} className="mr-1" />
-          Me gusta
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => reactionMutation.mutate({ commentId: comment.id, reactionType: "dislike" })}
-        >
-          <ThumbsDown size={16} className="mr-1" />
-          No me gusta
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => reactionMutation.mutate({ commentId: comment.id, reactionType: "smile" })}
-        >
-          <Smile size={16} className="mr-1" />
-          Me divierte
-        </Button>
-      </div>
-      {replyingTo === comment.id && (
-        <div className="mt-4">
-          <Textarea
-            placeholder="Escribe tu respuesta..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="mb-2"
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setReplyingTo(null);
-                setNewComment("");
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => commentMutation.mutate({ content: newComment, parentId: comment.id })}
-              disabled={!newComment.trim()}
-            >
-              Responder
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
   const organizeComments = (commentsArray: Comment[]) => {
     const topLevelComments = commentsArray.filter(comment => !comment.parent_id);
@@ -261,9 +118,9 @@ export const ProductComments = ({
     const sortComments = (comments: Comment[]) => {
       switch (commentSort) {
         case "upvotes":
-          return comments.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+          return comments.sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
         case "downvotes":
-          return comments.sort((a, b) => (b.downvotes || 0) - (a.downvotes || 0));
+          return comments.sort((a, b) => (a.upvotes - a.downvotes) - (b.upvotes - b.downvotes));
         case "recent":
         default:
           return comments;
@@ -274,7 +131,12 @@ export const ProductComments = ({
       const replies = commentsByParentId[comment.id] || [];
       return (
         <div key={comment.id}>
-          {renderComment(comment)}
+          <SingleComment
+            comment={comment}
+            onVote={(commentId, voteType) => voteMutation.mutate({ commentId, voteType })}
+            onReply={(commentId, content) => commentMutation.mutate({ content, parentId: commentId })}
+            depth={comment.depth}
+          />
           {sortComments(replies).map(reply => renderCommentThread(reply))}
         </div>
       );
@@ -314,6 +176,12 @@ export const ProductComments = ({
         </div>
       </CardHeader>
       <CardContent>
+        <div className="mb-6">
+          <CommentForm
+            onSubmit={(content) => commentMutation.mutate({ content })}
+          />
+        </div>
+        
         {isLoading ? (
           <div className="flex justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -324,7 +192,7 @@ export const ProductComments = ({
           </div>
         ) : (
           <p className="text-center text-gray-500 py-8">
-            No hay comentarios aún.
+            No hay comentarios aún. ¡Sé el primero en comentar!
           </p>
         )}
       </CardContent>
