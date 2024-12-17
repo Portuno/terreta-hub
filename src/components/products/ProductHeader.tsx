@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Users } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ interface ProductHeaderProps {
     linkedin_url?: string | null;
     main_categories?: string[];
     sub_categories?: string[] | null;
+    team_members?: { name: string; role: string }[] | null;
   };
 }
 
@@ -98,11 +99,28 @@ export const ProductHeader = ({ product }: ProductHeaderProps) => {
             href={product.linkedin_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-blue-600 hover:underline"
+            className="flex items-center gap-2 text-blue-600 hover:underline mb-4"
           >
             <ExternalLink size={16} />
             LinkedIn
           </a>
+        )}
+
+        {product.team_members && product.team_members.length > 0 && (
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Users size={16} />
+              Equipo
+            </h3>
+            <div className="space-y-2">
+              {product.team_members.map((member, index) => (
+                <div key={index} className="text-sm">
+                  <span className="font-medium">{member.name}</span>
+                  <span className="text-gray-500 ml-2">{member.role}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         <div className="mt-6">
