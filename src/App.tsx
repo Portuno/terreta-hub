@@ -13,6 +13,7 @@ import ForumTopic from "./pages/ForumTopic";
 import FAQ from "./pages/FAQ";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import ProductDetail from "./pages/ProductDetail";
 import { useState } from "react";
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/productos" element={<Products />} />
             <Route path="/productos/nuevo" element={<NewProduct />} />
+            <Route path="/productos/:id" element={<ProductDetail />} />
             <Route path="/recursos" element={<Resources />} />
             <Route path="/eventos" element={<Events />} />
             <Route path="/foro" element={<Forum />} />

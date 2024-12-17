@@ -17,6 +17,7 @@ interface Product {
   main_categories: string[];
   sub_categories: string[] | null;
   logo_url: string | null;
+  team_members: { name: string; role: string }[] | null;
   profile: {
     username: string;
     avatar_url: string | null;
@@ -34,13 +35,16 @@ const ProductDetail = () => {
         .from("products")
         .select(`
           *,
-          profile:profiles!fk_products_profile(username, avatar_url)
+          profile:profiles(username, avatar_url)
         `)
         .eq("id", id)
         .single();
 
       if (error) throw error;
-      return data as Product;
+      return {
+        ...data,
+        team_members: data.team_members ? JSON.parse(JSON.stringify(data.team_members)) : null
+      } as Product;
     },
   });
 
@@ -51,7 +55,7 @@ const ProductDetail = () => {
         .from("product_comments")
         .select(`
           *,
-          profile:profiles!fk_product_comments_profile(username, avatar_url)
+          profile:profiles(username, avatar_url)
         `)
         .eq("product_id", id);
 
@@ -104,14 +108,18 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-16 container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <ProductHeader product={product} />
-          <ProductComments 
-            comments={comments}
-            isLoading={commentsLoading}
-            commentSort={commentSort}
-            setCommentSort={setCommentSort}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <ProductHeader product={product} />
+          </div>
+          <div>
+            <ProductComments 
+              comments={comments}
+              isLoading={commentsLoading}
+              commentSort={commentSort}
+              setCommentSort={setCommentSort}
+            />
+          </div>
         </div>
       </div>
     </div>
