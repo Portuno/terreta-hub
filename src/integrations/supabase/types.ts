@@ -171,7 +171,15 @@ export type Database = {
           user_id?: string
           views?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       forum_votes: {
         Row: {
@@ -199,6 +207,111 @@ export type Database = {
           vote_type?: boolean
         }
         Relationships: []
+      }
+      product_comment_votes: {
+        Row: {
+          comment_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+          vote_type: boolean
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+          vote_type: boolean
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          vote_type?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_comment_votes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "product_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          downvotes: number | null
+          id: string
+          product_id: string
+          updated_at: string | null
+          upvotes: number | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          product_id: string
+          updated_at?: string | null
+          upvotes?: number | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          product_id?: string
+          updated_at?: string | null
+          upvotes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_comments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_id: string
+          user_id: string
+          vote_type: boolean
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_id: string
+          user_id: string
+          vote_type: boolean
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_id?: string
+          user_id?: string
+          vote_type?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_votes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
