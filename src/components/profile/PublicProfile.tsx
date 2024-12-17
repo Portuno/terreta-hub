@@ -1,17 +1,36 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserContributions } from "./UserContributions";
 import { UserActivity } from "./UserActivity";
 import { UserAchievements } from "./UserAchievements";
+import { Globe, Twitter, Youtube, Instagram, Linkedin, Github } from "lucide-react";
 
 interface PublicProfileProps {
   profile: any;
 }
 
 export const PublicProfile = ({ profile }: PublicProfileProps) => {
-  const { username, bio, avatar_url, interests, location } = profile;
+  const { 
+    username, 
+    display_name,
+    bio, 
+    avatar_url, 
+    interests, 
+    location,
+    website_url,
+    social_links 
+  } = profile;
+
+  const socialIcons = {
+    twitter: Twitter,
+    youtube: Youtube,
+    instagram: Instagram,
+    linkedin: Linkedin,
+    github: Github,
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -26,13 +45,40 @@ export const PublicProfile = ({ profile }: PublicProfileProps) => {
                   {username.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <CardTitle className="mt-4">{username}</CardTitle>
+              <CardTitle className="mt-4">{display_name || username}</CardTitle>
+              <p className="text-sm text-muted-foreground">@{username}</p>
               {location && (
                 <p className="text-sm text-muted-foreground">{location}</p>
               )}
             </CardHeader>
             <CardContent>
               {bio && <p className="text-sm text-center mb-4">{bio}</p>}
+              
+              {/* Links */}
+              <div className="flex flex-col gap-2 mb-4">
+                {website_url && (
+                  <Button variant="outline" className="w-full" asChild>
+                    <a href={website_url} target="_blank" rel="noopener noreferrer">
+                      <Globe className="mr-2 h-4 w-4" />
+                      Sitio web
+                    </a>
+                  </Button>
+                )}
+                
+                {Object.entries(social_links || {}).map(([platform, url]) => {
+                  if (!url) return null;
+                  const Icon = socialIcons[platform as keyof typeof socialIcons];
+                  return (
+                    <Button key={platform} variant="outline" className="w-full" asChild>
+                      <a href={url as string} target="_blank" rel="noopener noreferrer">
+                        {Icon && <Icon className="mr-2 h-4 w-4" />}
+                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                      </a>
+                    </Button>
+                  );
+                })}
+              </div>
+
               {interests && interests.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center">
                   {interests.map((interest: string) => (

@@ -31,7 +31,7 @@ export const UserMenu = ({ username, onLogout }: UserMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuItem asChild>
-          <Link to="/perfil" className="flex items-center">
+          <Link to={`/perfil/${username}`} className="flex items-center">
             <User className="mr-2 h-4 w-4" />
             <span>Ver Perfil</span>
           </Link>

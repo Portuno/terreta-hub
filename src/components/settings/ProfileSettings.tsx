@@ -38,8 +38,11 @@ export const ProfileSettings = () => {
         .from("profiles")
         .update({
           username: profile.username,
+          display_name: profile.display_name,
           bio: profile.bio,
           location: profile.location,
+          website_url: profile.website_url,
+          social_links: profile.social_links,
         })
         .eq("id", profile.id);
 
@@ -84,6 +87,17 @@ export const ProfileSettings = () => {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="display_name">Nombre para mostrar</Label>
+            <Input
+              id="display_name"
+              value={profile.display_name || ""}
+              onChange={(e) =>
+                setProfile({ ...profile, display_name: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="bio">Biografía</Label>
             <Textarea
               id="bio"
@@ -103,6 +117,44 @@ export const ProfileSettings = () => {
               }
               placeholder="Ej: Valencia"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="website">Sitio web</Label>
+            <Input
+              id="website"
+              type="url"
+              value={profile.website_url || ""}
+              onChange={(e) =>
+                setProfile({ ...profile, website_url: e.target.value })
+              }
+              placeholder="https://..."
+            />
+          </div>
+
+          <div className="space-y-4">
+            <Label>Redes sociales</Label>
+            {Object.entries(profile.social_links || {}).map(([platform, url]) => (
+              <div key={platform} className="space-y-2">
+                <Label htmlFor={platform} className="capitalize">
+                  {platform}
+                </Label>
+                <Input
+                  id={platform}
+                  value={url as string || ""}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      social_links: {
+                        ...profile.social_links,
+                        [platform]: e.target.value,
+                      },
+                    })
+                  }
+                  placeholder={`URL de ${platform}`}
+                />
+              </div>
+            ))}
           </div>
 
           <Button type="submit" disabled={loading}>
