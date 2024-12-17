@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
-import { ExternalLink, ArrowUp, ArrowDown } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { ProductVotes } from "./ProductVotes";
 
 interface ProductHeaderProps {
   product: {
@@ -23,9 +22,6 @@ interface ProductHeaderProps {
 }
 
 export const ProductHeader = ({ product }: ProductHeaderProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
   const { data: voteData } = useQuery({
     queryKey: ["product-vote", product.id],
     queryFn: async () => {
@@ -46,43 +42,6 @@ export const ProductHeader = ({ product }: ProductHeaderProps) => {
         upvotes: voteCounts?.upvotes || 0,
         downvotes: voteCounts?.downvotes || 0,
       };
-    },
-  });
-
-  const voteMutation = useMutation({
-    mutationFn: async ({ voteType }: { voteType: boolean }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const { error: deleteError } = await supabase
-        .from("product_votes")
-        .delete()
-        .eq("product_id", product.id)
-        .eq("user_id", user.id);
-
-      if (deleteError) throw deleteError;
-
-      const { error: insertError } = await supabase
-        .from("product_votes")
-        .insert({
-          product_id: product.id,
-          user_id: user.id,
-          vote_type: voteType,
-        });
-
-      if (insertError) throw insertError;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product-vote", product.id] });
-      toast({
-        description: "Tu voto ha sido registrado",
-      });
-    },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        description: "Error al registrar tu voto",
-      });
     },
   });
 
@@ -109,38 +68,17 @@ export const ProductHeader = ({ product }: ProductHeaderProps) => {
               </Link>
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => voteMutation.mutate({ voteType: true })}
-              className={voteData?.userVote === true ? "bg-green-100" : ""}
-            >
-              <ArrowUp />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => voteMutation.mutate({ voteType: false })}
-              className={voteData?.userVote === false ? "bg-red-100" : ""}
-            >
-              <ArrowDown />
-            </Button>
-          </div>
+          {voteData && (
+            <ProductVotes
+              productId={product.id}
+              userVote={voteData.userVote}
+              upvotes={voteData.upvotes}
+              downvotes={voteData.downvotes}
+            />
+          )}
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-end gap-4 mb-4 text-sm text-gray-500">
-          <span className="flex items-center gap-1">
-            <ArrowUp className="text-green-500" size={16} />
-            {voteData?.upvotes || 0}
-          </span>
-          <span className="flex items-center gap-1">
-            <ArrowDown className="text-red-500" size={16} />
-            {voteData?.downvotes || 0}
-          </span>
-        </div>
-
         <p className="text-gray-600 mb-4">{product.description}</p>
         
         {product.website_url && (
