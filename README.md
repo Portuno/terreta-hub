@@ -1,69 +1,98 @@
-# Welcome to your Lovable project
+# InnovaHub Connect 🚀
 
-## Project info
+InnovaHub Connect es una plataforma diseñada para conectar y potenciar el ecosistema de innovación en Valencia. Permite a emprendedores, desarrolladores y profesionales compartir sus proyectos, conectar con otros innovadores y mantenerse al día con los últimos eventos y recursos del ecosistema tecnológico valenciano.
 
-**URL**: https://lovable.dev/projects/5a0ea1f2-26ff-4a8b-ad8e-11cbfb53cff2
+## 🌟 Características Principales
 
-## How can I edit this code?
+### Productos y Proyectos
+- Showcase de productos y proyectos innovadores
+- Sistema de votación y feedback de la comunidad
+- Perfiles detallados de productos con información sobre el equipo, tecnologías y estado del proyecto
+- Categorización por sectores y tecnologías
 
-There are several ways of editing your application.
+### Comunidad
+- Foro de discusión para compartir ideas y conocimientos
+- Sistema de perfiles de usuario personalizables
+- Interacción directa entre miembros de la comunidad
+- Sistema de votación y reconocimiento
 
-**Use Lovable**
+### Recursos y Eventos
+- Calendario de eventos tech en Valencia
+- Recursos compartidos por la comunidad
+- FAQs y guías útiles
+- Directorio de recursos del ecosistema
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5a0ea1f2-26ff-4a8b-ad8e-11cbfb53cff2) and start prompting.
+## 🛠️ Tecnologías Utilizadas
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend:**
+  - React + TypeScript
+  - Vite
+  - Tailwind CSS
+  - shadcn/ui
+  - React Query
 
-**Use your preferred IDE**
+- **Backend:**
+  - Supabase (Base de datos, Autenticación, Storage)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Comenzando
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Requisitos Previos
 
-Follow these steps:
+- Node.js (versión 16 o superior)
+- npm o yarn
+- Git
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Instalación
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clona el repositorio:
+```bash
+git clone [URL_DEL_REPOSITORIO]
+cd innovahub-connect
 ```
 
-**Edit a file directly in GitHub**
+2. Instala las dependencias:
+```bash
+npm install
+# o
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Inicia el servidor de desarrollo:
+```bash
+npm run dev
+# o
+yarn dev
+```
 
-**Use GitHub Codespaces**
+4. Abre [http://localhost:5173](http://localhost:5173) en tu navegador.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🤝 Contribuir
 
-## What technologies are used for this project?
+¡Las contribuciones son bienvenidas! Si quieres contribuir:
 
-This project is built with .
+1. Haz fork del proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📝 Licencia
 
-## How can I deploy this project?
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
 
-Simply open [Lovable](https://lovable.dev/projects/5a0ea1f2-26ff-4a8b-ad8e-11cbfb53cff2) and click on Share -> Publish.
+## 📞 Contacto
 
-## I want to use a custom domain - is that possible?
+Si tienes preguntas o sugerencias, no dudes en:
+- Abrir un issue en este repositorio
+- Contactar a través del foro de la comunidad
+- Enviar un email a [EMAIL_DE_CONTACTO]
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## 🙏 Agradecimientos
+
+- A toda la comunidad tech de Valencia por su apoyo y contribuciones
+- A los mentores y colaboradores que han hecho posible este proyecto
+- A todos los usuarios que confían en nuestra plataforma
+
+---
+
+Desarrollado con ❤️ en Valencia 🦇
