@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -16,7 +17,9 @@ const Products = () => {
         .from("products")
         .select(`
           *,
-          profile:profiles(username)
+          profiles (
+            username
+          )
         `)
         .order("created_at", { ascending: false });
       
@@ -26,9 +29,9 @@ const Products = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="pt-16">
+      <div className="pt-16 flex-grow">
         <main className="container mx-auto py-8 px-4">
           <div className="animate-fade-in">
             <div className="flex justify-between items-center mb-6">
@@ -53,7 +56,7 @@ const Products = () => {
                     <h3 className="text-xl font-semibold mb-2">{product.title}</h3>
                     <p className="text-gray-600 mb-4 line-clamp-3">{product.description}</p>
                     <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>Por {product.profile?.username}</span>
+                      <span>Por {product.profiles?.username}</span>
                       <span>{product.views} visualizaciones</span>
                     </div>
                   </Link>
@@ -67,6 +70,7 @@ const Products = () => {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   );
 };
