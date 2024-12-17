@@ -9,6 +9,22 @@ import { TopicList } from "@/components/forum/TopicList";
 import { NewTopicDialog } from "@/components/forum/NewTopicDialog";
 import { Footer } from "@/components/Footer";
 
+interface Profile {
+  username: string;
+}
+
+interface ForumTopic {
+  id: string;
+  title: string;
+  content: string;
+  views: number;
+  replies: number;
+  created_at: string;
+  upvotes: number;
+  downvotes: number;
+  profile: Profile;
+}
+
 const Forum = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -16,7 +32,7 @@ const Forum = () => {
   const [timeFilter, setTimeFilter] = useState("all");
   const { toast } = useToast();
 
-  const { data: topics, refetch } = useQuery({
+  const { data: topics, refetch } = useQuery<ForumTopic[]>({
     queryKey: ['forum-topics', timeFilter],
     queryFn: async () => {
       let query = supabase
@@ -47,7 +63,10 @@ const Forum = () => {
 
       const { data, error } = await query.order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching topics:", error);
+        throw error;
+      }
       return data;
     }
   });

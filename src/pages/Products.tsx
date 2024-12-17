@@ -7,10 +7,23 @@ import { Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 
+interface Profile {
+  username: string;
+}
+
+interface Product {
+  id: string;
+  title: string;
+  description: string;
+  views: number;
+  created_at: string;
+  profiles: Profile;
+}
+
 const Products = () => {
   const navigate = useNavigate();
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -23,7 +36,10 @@ const Products = () => {
         `)
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+      }
       return data;
     },
   });
