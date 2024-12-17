@@ -15,24 +15,22 @@ interface Product {
   id: string;
   title: string;
   description: string;
-  views: number;
+  views: number | null;
   created_at: string;
-  profiles: Profile;
+  profile: Profile;
 }
 
 const Products = () => {
   const navigate = useNavigate();
 
-  const { data: products, isLoading } = useQuery<Product[]>({
+  const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select(`
           *,
-          profiles (
-            username
-          )
+          profile:profiles(username)
         `)
         .order("created_at", { ascending: false });
       
@@ -40,7 +38,11 @@ const Products = () => {
         console.error("Error fetching products:", error);
         throw error;
       }
-      return data;
+
+      return (data as any[]).map(product => ({
+        ...product,
+        profile: product.profile || { username: 'Usuario Anónimo' }
+      }));
     },
   });
 
@@ -72,8 +74,8 @@ const Products = () => {
                     <h3 className="text-xl font-semibold mb-2">{product.title}</h3>
                     <p className="text-gray-600 mb-4 line-clamp-3">{product.description}</p>
                     <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>Por {product.profiles?.username}</span>
-                      <span>{product.views} visualizaciones</span>
+                      <span>Por {product.profile?.username}</span>
+                      <span>{product.views || 0} visualizaciones</span>
                     </div>
                   </Link>
                 ))}

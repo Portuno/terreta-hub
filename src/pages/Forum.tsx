@@ -17,11 +17,12 @@ interface ForumTopic {
   id: string;
   title: string;
   content: string;
-  views: number;
-  replies: number;
+  user_id: string;
+  views: number | null;
+  replies: number | null;
   created_at: string;
-  upvotes: number;
-  downvotes: number;
+  upvotes: number | null;
+  downvotes: number | null;
   profile: Profile;
 }
 
@@ -32,7 +33,7 @@ const Forum = () => {
   const [timeFilter, setTimeFilter] = useState("all");
   const { toast } = useToast();
 
-  const { data: topics, refetch } = useQuery<ForumTopic[]>({
+  const { data: topics = [], refetch } = useQuery<ForumTopic[]>({
     queryKey: ['forum-topics', timeFilter],
     queryFn: async () => {
       let query = supabase
@@ -67,7 +68,11 @@ const Forum = () => {
         console.error("Error fetching topics:", error);
         throw error;
       }
-      return data;
+
+      return (data as any[]).map(topic => ({
+        ...topic,
+        profile: topic.profile || { username: 'Usuario Anónimo' }
+      }));
     }
   });
 
@@ -122,7 +127,7 @@ const Forum = () => {
           <div className="animate-fade-in">
             <ForumHeader onNewTopic={() => setIsOpen(true)} />
             <TimeFilter value={timeFilter} onValueChange={setTimeFilter} />
-            <TopicList topics={topics || []} />
+            <TopicList topics={topics} />
           </div>
         </main>
       </div>
