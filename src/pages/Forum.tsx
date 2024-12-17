@@ -37,7 +37,7 @@ const Forum = () => {
   const [timeFilter, setTimeFilter] = useState("all");
   const { toast } = useToast();
 
-  const { data: topics, refetch } = useQuery<ForumTopic[]>({
+  const { data: topics, refetch } = useQuery({
     queryKey: ['forum-topics', timeFilter],
     queryFn: async () => {
       let query = supabase
@@ -70,7 +70,7 @@ const Forum = () => {
       const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as ForumTopic[];
+      return data as unknown as ForumTopic[];
     }
   });
 
@@ -135,7 +135,7 @@ const Forum = () => {
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-4xl font-bold text-foreground">Foro</h1>
               <Button onClick={() => setIsOpen(true)}>
-                Nueva Pregunta
+                Nuevo Debate
               </Button>
             </div>
 
@@ -206,13 +206,13 @@ const Forum = () => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Nueva Pregunta</DialogTitle>
+            <DialogTitle>Nuevo Debate</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Título</label>
               <Input
-                placeholder="Escribe el título de tu pregunta"
+                placeholder="Escribe el título de tu debate"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -220,7 +220,7 @@ const Forum = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Contenido</label>
               <Textarea
-                placeholder="Describe tu pregunta en detalle"
+                placeholder="Describe tu debate en detalle"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={5}

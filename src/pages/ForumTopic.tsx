@@ -1,21 +1,19 @@
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
-import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-react";
-import { useState } from "react";
-import type { ForumTopic, ForumComment } from "@/types/forum";
+import { ForumComment, ForumTopic } from "@/types/forum";
+import { Navbar } from "../components/Navbar";
 
 const ForumTopic = () => {
   const { id } = useParams();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState("");
 
-  const { data: topic } = useQuery<ForumTopic>({
+  const { data: topic } = useQuery({
     queryKey: ["forum-topic", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,11 +26,11 @@ const ForumTopic = () => {
         .single();
 
       if (error) throw error;
-      return data as ForumTopic;
+      return data as unknown as ForumTopic;
     },
   });
 
-  const { data: comments } = useQuery<ForumComment[]>({
+  const { data: comments, refetch: refetchComments } = useQuery({
     queryKey: ["forum-comments", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,161 +43,89 @@ const ForumTopic = () => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data as ForumComment[];
+      return data as unknown as ForumComment[];
     },
   });
 
-  const voteMutation = useMutation({
-    mutationFn: async ({ voteType, targetId }: { voteType: boolean; targetId: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Debes iniciar sesión para votar");
+  const handleCommentSubmit = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const { data: existingVote } = await supabase
-        .from("forum_votes")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("target_id", targetId)
-        .single();
-
-      if (existingVote) {
-        if (existingVote.vote_type === voteType) {
-          // Remove vote
-          await supabase
-            .from("forum_votes")
-            .delete()
-            .eq("id", existingVote.id);
-        } else {
-          // Update vote
-          await supabase
-            .from("forum_votes")
-            .update({ vote_type: voteType })
-            .eq("id", existingVote.id);
-        }
-      } else {
-        // Create new vote
-        await supabase.from("forum_votes").insert({
-          user_id: user.id,
-          target_id: targetId,
-          target_type: "topic",
-          vote_type: voteType,
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Debes iniciar sesión para comentar",
+          variant: "destructive",
         });
+        return;
       }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forum-topic", id] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const commentMutation = useMutation({
-    mutationFn: async (content: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Debes iniciar sesión para comentar");
 
       const { error } = await supabase.from("forum_comments").insert({
+        content: newComment,
         topic_id: id,
         user_id: user.id,
-        content,
       });
 
       if (error) throw error;
-    },
-    onSuccess: () => {
-      setNewComment("");
-      queryClient.invalidateQueries({ queryKey: ["forum-comments", id] });
+
       toast({
         title: "¡Éxito!",
         description: "Tu comentario ha sido publicado",
       });
-    },
-    onError: (error: Error) => {
+
+      setNewComment("");
+      refetchComments();
+    } catch (error) {
+      console.error("Error creating comment:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: "No se pudo publicar el comentario",
         variant: "destructive",
       });
-    },
-  });
-
-  if (!topic) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-16 container mx-auto px-4">
-          <h1 className="text-2xl font-bold">Tema no encontrado</h1>
-        </div>
-      </div>
-    );
-  }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-16 container mx-auto px-4 py-8">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h1 className="text-2xl font-bold">{topic.title}</h1>
-          <p className="text-gray-600 mt-4">{topic.content}</p>
-          
-          <div className="flex items-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => voteMutation.mutate({ voteType: true, targetId: topic.id })}
-            >
-              <ThumbsUp className="h-4 w-4 mr-2" />
-              {topic.upvotes || 0}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => voteMutation.mutate({ voteType: false, targetId: topic.id })}
-            >
-              <ThumbsDown className="h-4 w-4 mr-2" />
-              {topic.downvotes || 0}
-            </Button>
-            <span className="text-sm text-gray-500">
-              por {topic.profile?.username}
-            </span>
-          </div>
+      <div className="pt-16">
+        <main className="container mx-auto py-8 px-4">
+          {topic && (
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <h1 className="text-2xl font-bold">{topic.title}</h1>
+              <p className="mt-4">{topic.content}</p>
+              <p className="mt-2 text-sm text-gray-500">Creado por {topic.profile?.username}</p>
+            </div>
+          )}
 
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Comentarios</h2>
-            
-            <div className="space-y-4 mb-8">
-              {comments?.map((comment) => (
-                <div key={comment.id} className="border-b pb-4">
-                  <p className="text-gray-800">{comment.content}</p>
-                  <div className="flex items-center gap-4 mt-2">
-                    <span className="text-sm text-gray-500">
-                      por {comment.profile?.username}
-                    </span>
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold mb-4">Comentarios</h2>
+            {comments && comments.length > 0 ? (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="border-b pb-4">
+                    <p className="text-sm text-gray-600">{comment.content}</p>
+                    <p className="text-xs text-gray-500">por {comment.profile?.username}</p>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-4">
-              <Textarea
-                placeholder="Escribe tu comentario..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              />
-              <Button 
-                onClick={() => commentMutation.mutate(newComment)}
-                disabled={!newComment.trim()}
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Comentar
-              </Button>
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">No hay comentarios aún.</p>
+            )}
           </div>
-        </div>
+
+          <div className="mt-6">
+            <Textarea
+              placeholder="Escribe tu comentario..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              rows={3}
+            />
+            <Button onClick={handleCommentSubmit} className="mt-2">Comentar</Button>
+          </div>
+        </main>
       </div>
     </div>
   );
