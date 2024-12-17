@@ -108,79 +108,76 @@ const Products = () => {
       <Navbar />
       <div className="pt-16 flex-grow">
         <main className="container mx-auto py-8 px-4">
-          <div className="animate-fade-in">
-            <div className="flex justify-between items-center mb-6">
+          <div className="animate-fade-in space-y-6">
+            <div className="flex justify-between items-center">
               <h1 className="text-4xl font-bold text-foreground">Productos</h1>
-              <Button onClick={() => navigate("/productos/nuevo")} className="bg-primary hover:bg-primary-dark text-white font-bold">
+              <Button 
+                onClick={() => navigate("/productos/nuevo")} 
+                className="bg-primary hover:bg-primary-dark text-white font-bold"
+              >
                 Crear Proyecto
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <div className="lg:col-span-1">
-                <ProductFilters
-                  categories={allCategories}
-                  selectedCategories={selectedCategories}
-                  onCategoryChange={handleCategoryChange}
-                  onClearFilters={() => setSelectedCategories([])}
-                />
-              </div>
+            <ProductFilters
+              categories={allCategories}
+              selectedCategories={selectedCategories}
+              onCategoryChange={handleCategoryChange}
+              onClearFilters={() => setSelectedCategories([])}
+            />
 
-              <div className="lg:col-span-3">
-                {isLoading ? (
-                  <div className="flex justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
-                ) : products && products.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {products.map((product) => (
-                      <div
-                        key={product.id}
-                        className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6"
-                      >
-                        <div className="flex justify-between items-start">
-                          <Link
-                            to={`/productos/${product.id}`}
-                            className="flex-grow"
-                          >
-                            <h3 className="text-xl font-semibold mb-2">{product.title}</h3>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleShare(product)}
-                            className="ml-2"
-                          >
-                            <Share2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <Link
-                          to={`/productos/${product.id}`}
-                          className="block"
-                        >
-                          <p className="text-gray-600 mb-4 line-clamp-3">{product.description}</p>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {product.main_categories?.map((category) => (
-                              <Badge key={category} variant="secondary">
-                                {category}
-                              </Badge>
-                            ))}
-                          </div>
-                          <div className="flex justify-between items-center text-sm text-gray-500">
-                            <span>Por {product.profile?.username}</span>
-                            <span>{product.views || 0} visualizaciones</span>
-                          </div>
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    No hay productos disponibles en este momento.
-                  </p>
-                )}
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin" />
               </div>
-            </div>
+            ) : products && products.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6"
+                  >
+                    <div className="flex justify-between items-start">
+                      <Link
+                        to={`/productos/${product.id}`}
+                        className="flex-grow"
+                      >
+                        <h3 className="text-xl font-semibold mb-2">{product.title}</h3>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleShare(product)}
+                        className="ml-2"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Link
+                      to={`/productos/${product.id}`}
+                      className="block"
+                    >
+                      <p className="text-gray-600 mb-4 line-clamp-3">{product.description}</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {product.main_categories?.map((category) => (
+                          <Badge key={category} variant="secondary">
+                            {category}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex justify-between items-center text-sm text-gray-500">
+                        <span>Por {product.profile?.username}</span>
+                        <span>{product.views || 0} visualizaciones</span>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">
+                No hay productos disponibles en este momento.
+              </p>
+            )}
           </div>
         </main>
       </div>

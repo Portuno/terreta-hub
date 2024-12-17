@@ -1,7 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { Filter, X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface ProductFiltersProps {
   categories: string[];
@@ -18,49 +23,65 @@ export const ProductFilters = ({
 }: ProductFiltersProps) => {
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Filtros</h3>
-        {selectedCategories.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={onClearFilters}>
-            Limpiar filtros
-          </Button>
-        )}
-      </div>
-      
-      <div>
-        <h4 className="text-sm font-medium mb-2">Categorías</h4>
-        <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-          <div className="space-y-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategories.includes(category) ? "default" : "outline"}
-                className="w-full justify-start"
-                onClick={() => onCategoryChange(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <Filter className="h-4 w-4" />
+              Filtros
+              {selectedCategories.length > 0 && (
+                <Badge variant="secondary" className="ml-1">
+                  {selectedCategories.length}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium">Categorías</h3>
+                {selectedCategories.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onClearFilters}
+                    className="h-8 px-2 text-xs"
+                  >
+                    Limpiar filtros
+                  </Button>
+                )}
+              </div>
+              <ScrollArea className="h-[300px]">
+                <div className="grid grid-cols-2 gap-2">
+                  {categories.map((category) => (
+                    <Button
+                      key={category}
+                      variant={selectedCategories.includes(category) ? "default" : "outline"}
+                      className="w-full justify-start text-sm"
+                      onClick={() => onCategoryChange(category)}
+                    >
+                      {category}
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </PopoverContent>
+        </Popover>
 
-      {selectedCategories.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Filtros activos</h4>
-          <div className="flex flex-wrap gap-2">
-            {selectedCategories.map((category) => (
-              <Badge key={category} variant="secondary">
-                {category}
-                <X
-                  className="ml-1 h-3 w-3 cursor-pointer"
-                  onClick={() => onCategoryChange(category)}
-                />
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+        {/* Selected categories badges */}
+        {selectedCategories.map((category) => (
+          <Badge
+            key={category}
+            variant="secondary"
+            className="gap-1 cursor-pointer hover:bg-secondary/80"
+            onClick={() => onCategoryChange(category)}
+          >
+            {category}
+            <X className="h-3 w-3" />
+          </Badge>
+        ))}
+      </div>
     </div>
   );
 };
