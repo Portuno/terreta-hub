@@ -5,6 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductVotes } from "./ProductVotes";
 
+interface TeamMember {
+  name: string;
+  role: string;
+}
+
 interface ProductHeaderProps {
   product: {
     id: string;
@@ -12,13 +17,14 @@ interface ProductHeaderProps {
     title: string;
     profile?: {
       username: string;
+      avatar_url?: string | null;
     };
     description: string;
     website_url?: string | null;
     linkedin_url?: string | null;
     main_categories?: string[];
     sub_categories?: string[] | null;
-    team_members?: { name: string; role: string }[] | null;
+    team_members?: TeamMember[] | null;
   };
 }
 

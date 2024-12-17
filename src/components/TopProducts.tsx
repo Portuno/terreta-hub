@@ -4,6 +4,11 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState } from "react";
 import { ProductHeader } from "./products/ProductHeader";
 
+interface TeamMember {
+  name: string;
+  role: string;
+}
+
 interface Product {
   id: string;
   title: string;
@@ -11,7 +16,14 @@ interface Product {
   views: number;
   profile: {
     username: string;
+    avatar_url?: string | null;
   };
+  logo_url?: string | null;
+  website_url?: string | null;
+  linkedin_url?: string | null;
+  main_categories?: string[];
+  sub_categories?: string[] | null;
+  team_members?: TeamMember[] | null;
 }
 
 export const TopProducts = () => {
@@ -27,7 +39,12 @@ export const TopProducts = () => {
         .limit(6);
       
       if (error) throw error;
-      return data;
+
+      // Transform team_members from JSON to proper type
+      return data.map(product => ({
+        ...product,
+        team_members: product.team_members ? JSON.parse(JSON.stringify(product.team_members)) : null
+      })) as Product[];
     },
   });
 
@@ -46,7 +63,12 @@ export const TopProducts = () => {
         .single();
 
       if (error) throw error;
-      return data;
+
+      // Transform team_members from JSON to proper type
+      return {
+        ...data,
+        team_members: data.team_members ? JSON.parse(JSON.stringify(data.team_members)) : null
+      } as Product;
     },
     enabled: !!selectedProduct,
   });
