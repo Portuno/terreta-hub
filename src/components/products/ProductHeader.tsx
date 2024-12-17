@@ -51,21 +51,24 @@ export const ProductHeader = ({ product }: ProductHeaderProps) => {
 
   const voteMutation = useMutation({
     mutationFn: async ({ voteType }: { voteType: boolean }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { error: deleteError } = await supabase
         .from("product_votes")
         .delete()
-        .eq("product_id", product.id);
+        .eq("product_id", product.id)
+        .eq("user_id", user.id);
 
       if (deleteError) throw deleteError;
 
       const { error: insertError } = await supabase
         .from("product_votes")
-        .insert([
-          {
-            product_id: product.id,
-            vote_type: voteType,
-          },
-        ]);
+        .insert({
+          product_id: product.id,
+          user_id: user.id,
+          vote_type: voteType,
+        });
 
       if (insertError) throw insertError;
     },

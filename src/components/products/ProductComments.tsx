@@ -36,21 +36,24 @@ export const ProductComments = ({
 
   const voteMutation = useMutation({
     mutationFn: async ({ commentId, voteType }: { commentId: string; voteType: boolean }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { error: deleteError } = await supabase
         .from("product_comment_votes")
         .delete()
-        .eq("comment_id", commentId);
+        .eq("comment_id", commentId)
+        .eq("user_id", user.id);
 
       if (deleteError) throw deleteError;
 
       const { error: insertError } = await supabase
         .from("product_comment_votes")
-        .insert([
-          {
-            comment_id: commentId,
-            vote_type: voteType,
-          },
-        ]);
+        .insert({
+          comment_id: commentId,
+          user_id: user.id,
+          vote_type: voteType,
+        });
 
       if (insertError) throw insertError;
     },

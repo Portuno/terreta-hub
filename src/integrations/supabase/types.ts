@@ -333,6 +333,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          downvotes: number | null
           gallery_urls: string[] | null
           id: string
           is_draft: boolean | null
@@ -355,6 +356,7 @@ export type Database = {
           team_location: string
           team_members: Json | null
           title: string
+          upvotes: number | null
           user_id: string
           video_url: string | null
           views: number | null
@@ -365,6 +367,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description: string
+          downvotes?: number | null
           gallery_urls?: string[] | null
           id?: string
           is_draft?: boolean | null
@@ -387,6 +390,7 @@ export type Database = {
           team_location?: string
           team_members?: Json | null
           title: string
+          upvotes?: number | null
           user_id: string
           video_url?: string | null
           views?: number | null
@@ -397,6 +401,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description?: string
+          downvotes?: number | null
           gallery_urls?: string[] | null
           id?: string
           is_draft?: boolean | null
@@ -419,6 +424,7 @@ export type Database = {
           team_location?: string
           team_members?: Json | null
           title?: string
+          upvotes?: number | null
           user_id?: string
           video_url?: string | null
           views?: number | null
