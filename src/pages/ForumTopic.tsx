@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ForumComment, ForumTopic } from "@/types/forum";
+import type { ForumComment, ForumTopic as ForumTopicType } from "@/types/forum";
 import { Navbar } from "../components/Navbar";
 
 const ForumTopic = () => {
@@ -26,7 +26,7 @@ const ForumTopic = () => {
         .single();
 
       if (error) throw error;
-      return data as unknown as ForumTopic;
+      return data as unknown as ForumTopicType;
     },
   });
 
