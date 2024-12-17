@@ -23,7 +23,7 @@ const ForumTopic = () => {
         .from("forum_topics")
         .select(`
           *,
-          profile:profiles(username, avatar_url, id)
+          profile:profiles!fk_forum_topics_profile (username, avatar_url, id)
         `)
         .eq("id", id)
         .single();
@@ -40,7 +40,7 @@ const ForumTopic = () => {
         .from("forum_comments")
         .select(`
           *,
-          profile:profiles(username, avatar_url, id)
+          profile:profiles!fk_forum_comments_profile (username, avatar_url, id)
         `)
         .eq("topic_id", id)
         .order("created_at", { ascending: true });

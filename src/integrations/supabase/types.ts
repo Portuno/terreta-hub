@@ -90,6 +90,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_forum_comments_profile"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "forum_comments_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: false
@@ -174,13 +181,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "fk_forum_topics_profile"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_user"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

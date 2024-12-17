@@ -22,7 +22,7 @@ const ProductDetail = () => {
         .from("products")
         .select(`
           *,
-          profile:profiles(username, avatar_url)
+          profile:profiles!fk_products_profile(username, avatar_url)
         `)
         .eq("id", id)
         .single();
@@ -39,7 +39,7 @@ const ProductDetail = () => {
         .from("product_comments")
         .select(`
           *,
-          profile:profiles(username, avatar_url)
+          profile:profiles!fk_product_comments_profile(username, avatar_url)
         `)
         .eq("product_id", id);
 
