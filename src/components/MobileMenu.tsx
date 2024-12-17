@@ -50,7 +50,7 @@ export const MobileMenu = ({
         {session ? (
           <div className="space-y-2 pt-2">
             <Link
-              to="/perfil"
+              to={`/perfil/${username}`}
               className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
               onClick={() => setIsOpen(false)}
             >

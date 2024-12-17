@@ -446,48 +446,57 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          display_name: string | null
           id: string
           interests: string[] | null
           location: string | null
           notification_settings: Json | null
           role: string
+          social_links: Json | null
           total_downvotes: number | null
           total_upvotes: number | null
           updated_at: string
           username: string
           visibility_settings: Json | null
+          website_url: string | null
         }
         Insert: {
           achievements?: Json | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          display_name?: string | null
           id: string
           interests?: string[] | null
           location?: string | null
           notification_settings?: Json | null
           role?: string
+          social_links?: Json | null
           total_downvotes?: number | null
           total_upvotes?: number | null
           updated_at?: string
           username: string
           visibility_settings?: Json | null
+          website_url?: string | null
         }
         Update: {
           achievements?: Json | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
           interests?: string[] | null
           location?: string | null
           notification_settings?: Json | null
           role?: string
+          social_links?: Json | null
           total_downvotes?: number | null
           total_upvotes?: number | null
           updated_at?: string
           username?: string
           visibility_settings?: Json | null
+          website_url?: string | null
         }
         Relationships: []
       }

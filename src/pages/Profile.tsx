@@ -25,7 +25,38 @@ const Profile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(`
+          *,
+          products (
+            id,
+            title,
+            description,
+            created_at
+          ),
+          forum_topics (
+            id,
+            title,
+            created_at
+          ),
+          forum_comments (
+            id,
+            content,
+            created_at,
+            forum_topics (
+              id,
+              title
+            )
+          ),
+          product_comments (
+            id,
+            content,
+            created_at,
+            products (
+              id,
+              title
+            )
+          )
+        `)
         .eq("username", username)
         .single();
 
