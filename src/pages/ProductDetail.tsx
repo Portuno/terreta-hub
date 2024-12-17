@@ -118,6 +118,7 @@ const ProductDetail = () => {
               isLoading={commentsLoading}
               commentSort={commentSort}
               setCommentSort={setCommentSort}
+              productId={id!}
             />
           </div>
         </div>

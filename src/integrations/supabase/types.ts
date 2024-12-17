@@ -215,6 +215,38 @@ export type Database = {
         }
         Relationships: []
       }
+      product_comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "product_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_comment_votes: {
         Row: {
           comment_id: string
@@ -251,8 +283,10 @@ export type Database = {
         Row: {
           content: string
           created_at: string | null
+          depth: number
           downvotes: number | null
           id: string
+          parent_id: string | null
           product_id: string
           updated_at: string | null
           upvotes: number | null
@@ -261,8 +295,10 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string | null
+          depth?: number
           downvotes?: number | null
           id?: string
+          parent_id?: string | null
           product_id: string
           updated_at?: string | null
           upvotes?: number | null
@@ -271,8 +307,10 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string | null
+          depth?: number
           downvotes?: number | null
           id?: string
+          parent_id?: string | null
           product_id?: string
           updated_at?: string | null
           upvotes?: number | null
@@ -284,6 +322,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "product_comments"
             referencedColumns: ["id"]
           },
           {
