@@ -7,6 +7,17 @@ import { useState } from "react";
 import { ProductHeader } from "@/components/products/ProductHeader";
 import { ProductComments } from "@/components/products/ProductComments";
 
+interface Product {
+  id: string;
+  title: string;
+  description: string;
+  short_description: string;
+  profile: {
+    username: string;
+    avatar_url: string | null;
+  };
+}
+
 const ProductDetail = () => {
   const { id } = useParams();
   const [commentSort, setCommentSort] = useState<"upvotes" | "downvotes" | "recent">("upvotes");
@@ -24,7 +35,7 @@ const ProductDetail = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Product;
     },
   });
 
