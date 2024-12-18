@@ -18,6 +18,8 @@ interface Product {
   sub_categories: string[] | null;
   logo_url: string | null;
   team_members: { name: string; role: string }[] | null;
+  video_url: string | null;
+  pitchdeck_url: string | null;
   profile: {
     username: string;
     avatar_url: string | null;

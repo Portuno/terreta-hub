@@ -388,6 +388,7 @@ export type Database = {
           logo_url: string | null
           main_categories: string[]
           metrics: Json | null
+          pitchdeck_url: string | null
           pricing_details: Json | null
           pricing_type: string | null
           problem_description: string | null
@@ -422,6 +423,7 @@ export type Database = {
           logo_url?: string | null
           main_categories?: string[]
           metrics?: Json | null
+          pitchdeck_url?: string | null
           pricing_details?: Json | null
           pricing_type?: string | null
           problem_description?: string | null
@@ -456,6 +458,7 @@ export type Database = {
           logo_url?: string | null
           main_categories?: string[]
           metrics?: Json | null
+          pitchdeck_url?: string | null
           pricing_details?: Json | null
           pricing_type?: string | null
           problem_description?: string | null
