@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { CommentForm } from "./CommentForm";
-import { SingleComment } from "./SingleComment";
+import { CommentSorter } from "./comments/CommentSorter";
+import { CommentList } from "./comments/CommentList";
 
 interface Comment {
   id: string;
@@ -106,73 +105,12 @@ export const ProductComments = ({
     },
   });
 
-  const organizeComments = (commentsArray: Comment[]) => {
-    const topLevelComments = commentsArray.filter(comment => !comment.parent_id);
-    const commentsByParentId = commentsArray.reduce((acc, comment) => {
-      if (comment.parent_id) {
-        acc[comment.parent_id] = [...(acc[comment.parent_id] || []), comment];
-      }
-      return acc;
-    }, {} as Record<string, Comment[]>);
-
-    const sortComments = (comments: Comment[]) => {
-      switch (commentSort) {
-        case "upvotes":
-          return comments.sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
-        case "downvotes":
-          return comments.sort((a, b) => (a.upvotes - a.downvotes) - (b.upvotes - b.downvotes));
-        case "recent":
-        default:
-          return comments;
-      }
-    };
-
-    const renderCommentThread = (comment: Comment) => {
-      const replies = commentsByParentId[comment.id] || [];
-      return (
-        <div key={comment.id}>
-          <SingleComment
-            comment={comment}
-            onVote={(commentId, voteType) => voteMutation.mutate({ commentId, voteType })}
-            onReply={(commentId, content) => commentMutation.mutate({ content, parentId: commentId })}
-            depth={comment.depth}
-          />
-          {sortComments(replies).map(reply => renderCommentThread(reply))}
-        </div>
-      );
-    };
-
-    return sortComments(topLevelComments).map(comment => renderCommentThread(comment));
-  };
-
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Comentarios</h2>
-          <div className="flex gap-2">
-            <Button
-              variant={commentSort === "upvotes" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setCommentSort("upvotes")}
-            >
-              Más votados
-            </Button>
-            <Button
-              variant={commentSort === "downvotes" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setCommentSort("downvotes")}
-            >
-              Menos votados
-            </Button>
-            <Button
-              variant={commentSort === "recent" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setCommentSort("recent")}
-            >
-              Recientes
-            </Button>
-          </div>
+          <CommentSorter commentSort={commentSort} setCommentSort={setCommentSort} />
         </div>
       </CardHeader>
       <CardContent>
@@ -182,19 +120,13 @@ export const ProductComments = ({
           />
         </div>
         
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        ) : comments && comments.length > 0 ? (
-          <div className="space-y-4">
-            {organizeComments(comments)}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500 py-8">
-            No hay comentarios aún. ¡Sé el primero en comentar!
-          </p>
-        )}
+        <CommentList
+          comments={comments}
+          isLoading={isLoading}
+          onVote={(commentId, voteType) => voteMutation.mutate({ commentId, voteType })}
+          onReply={(commentId, content) => commentMutation.mutate({ content, parentId: commentId })}
+          commentSort={commentSort}
+        />
       </CardContent>
     </Card>
   );
