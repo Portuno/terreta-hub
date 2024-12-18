@@ -56,14 +56,22 @@ export const CommentVotes = ({
 
       // Insertar nuevo voto si es diferente al anterior
       if (userVote !== voteType) {
+        const voteData = type === 'forum_comment' 
+          ? {
+              target_id: commentId,
+              user_id: user.id,
+              vote_type: voteType,
+              target_type: 'comment'
+            }
+          : {
+              comment_id: commentId,
+              user_id: user.id,
+              vote_type: voteType
+            };
+
         const { error: insertError } = await supabase
           .from(type === 'forum_comment' ? "forum_votes" : "product_comment_votes")
-          .insert({
-            [type === 'forum_comment' ? "target_id" : "comment_id"]: commentId,
-            user_id: user.id,
-            vote_type: voteType,
-            ...(type === 'forum_comment' ? { target_type: 'comment' } : {})
-          });
+          .insert(voteData);
 
         if (insertError) throw insertError;
       }
