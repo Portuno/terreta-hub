@@ -12,7 +12,15 @@ interface CategorySelectorProps {
 
 export const CategorySelector = ({
   title,
-  categories,
+  categories = [
+    "Tecnología",
+    "Salud",
+    "Educación",
+    "Finanzas",
+    "Sostenibilidad",
+    "Arte",
+    "Comunidad"
+  ],
   selectedCategories,
   onCategoryChange,
   maxCategories = 6
