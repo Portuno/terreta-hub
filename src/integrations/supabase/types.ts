@@ -30,6 +30,30 @@ export type Database = {
         }
         Relationships: []
       }
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          target_id: string
+          target_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          target_id: string
+          target_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       event_attendances: {
         Row: {
           created_at: string
@@ -305,6 +329,33 @@ export type Database = {
           target_type?: string
           user_id?: string
           vote_type?: boolean
+        }
+        Relationships: []
+      }
+      mentions: {
+        Row: {
+          created_at: string
+          id: string
+          mentioned_user_id: string | null
+          target_id: string
+          target_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentioned_user_id?: string | null
+          target_id: string
+          target_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentioned_user_id?: string | null
+          target_id?: string
+          target_type?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -628,6 +679,7 @@ export type Database = {
           interests: string[] | null
           location: string | null
           notification_settings: Json | null
+          reputation: number | null
           role: string
           social_links: Json | null
           total_downvotes: number | null
@@ -647,6 +699,7 @@ export type Database = {
           interests?: string[] | null
           location?: string | null
           notification_settings?: Json | null
+          reputation?: number | null
           role?: string
           social_links?: Json | null
           total_downvotes?: number | null
@@ -666,6 +719,7 @@ export type Database = {
           interests?: string[] | null
           location?: string | null
           notification_settings?: Json | null
+          reputation?: number | null
           role?: string
           social_links?: Json | null
           total_downvotes?: number | null

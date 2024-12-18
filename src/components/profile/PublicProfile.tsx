@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserContributions } from "./UserContributions";
 import { UserActivity } from "./UserActivity";
 import { UserAchievements } from "./UserAchievements";
+import { UserBadge } from "./UserBadge";
 import { Globe, Twitter, Youtube, Instagram, Linkedin, Github } from "lucide-react";
 
 interface PublicProfileProps {
@@ -21,7 +22,8 @@ export const PublicProfile = ({ profile }: PublicProfileProps) => {
     interests, 
     location,
     website_url,
-    social_links 
+    social_links,
+    reputation = 0
   } = profile;
 
   const socialIcons = {
@@ -45,11 +47,16 @@ export const PublicProfile = ({ profile }: PublicProfileProps) => {
                   {username.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <CardTitle className="mt-4">{display_name || username}</CardTitle>
-              <p className="text-sm text-muted-foreground">@{username}</p>
-              {location && (
-                <p className="text-sm text-muted-foreground">{location}</p>
-              )}
+              <div className="space-y-2">
+                <CardTitle>{display_name || username}</CardTitle>
+                <p className="text-sm text-muted-foreground">@{username}</p>
+                <div className="flex justify-center">
+                  <UserBadge reputation={reputation} />
+                </div>
+                {location && (
+                  <p className="text-sm text-muted-foreground">{location}</p>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {bio && <p className="text-sm text-center mb-4">{bio}</p>}
