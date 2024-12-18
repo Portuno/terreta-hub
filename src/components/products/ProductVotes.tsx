@@ -64,8 +64,6 @@ export const ProductVotes = ({ productId, userVote, upvotes, downvotes }: Produc
       }
     },
     onSuccess: () => {
-      // Invalidamos tanto la consulta del producto como la del voto específico
-      console.log('Invalidando cachés');
       queryClient.invalidateQueries({ queryKey: ["product", productId] });
       queryClient.invalidateQueries({ queryKey: ["product-vote", productId] });
       toast({

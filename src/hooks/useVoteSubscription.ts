@@ -13,17 +13,33 @@ export const useVoteSubscription = (type: VoteType, id: string) => {
     const getTableAndKey = (type: VoteType) => {
       switch (type) {
         case 'product':
-          return { table: 'products', key: ['product', id] };
+          return { 
+            table: 'products', 
+            key: ['product', id],
+            filter: `id=eq.${id}`
+          };
         case 'forum_topic':
-          return { table: 'forum_topics', key: ['forum-topic', id] };
+          return { 
+            table: 'forum_topics', 
+            key: ['forum-topic', id],
+            filter: `id=eq.${id}`
+          };
         case 'forum_comment':
-          return { table: 'forum_comments', key: ['forum-comments', id] };
+          return { 
+            table: 'forum_comments', 
+            key: ['forum-comments'],
+            filter: `id=eq.${id}`
+          };
         case 'product_comment':
-          return { table: 'product_comments', key: ['product-comments', id] };
+          return { 
+            table: 'product_comments', 
+            key: ['product-comments'],
+            filter: `id=eq.${id}`
+          };
       }
     };
 
-    const { table, key } = getTableAndKey(type);
+    const { table, key, filter } = getTableAndKey(type);
     
     const channel = supabase
       .channel('vote-changes')
@@ -33,7 +49,7 @@ export const useVoteSubscription = (type: VoteType, id: string) => {
           event: '*',
           schema: 'public',
           table: table,
-          filter: `id=eq.${id}`
+          filter: filter
         },
         (payload) => {
           console.log(`Vote update received for ${type}:`, payload);
