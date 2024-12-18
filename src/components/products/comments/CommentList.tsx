@@ -19,6 +19,7 @@ interface CommentListProps {
   isLoading: boolean;
   onVote: (commentId: string, voteType: boolean) => void;
   onReply: (commentId: string, content: string) => void;
+  onReport: (commentId: string, reason: string) => void;
   commentSort: "upvotes" | "downvotes" | "recent";
 }
 
@@ -27,6 +28,7 @@ export const CommentList = ({
   isLoading,
   onVote,
   onReply,
+  onReport,
   commentSort,
 }: CommentListProps) => {
   const sortComments = (comments: Comment[]) => {
@@ -57,6 +59,7 @@ export const CommentList = ({
         replies={commentsByParentId[comment.id] || []}
         onVote={onVote}
         onReply={onReply}
+        onReport={onReport}
         sortComments={sortComments}
       />
     ));

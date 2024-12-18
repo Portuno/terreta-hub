@@ -105,8 +105,38 @@ export const ProductComments = ({
     },
   });
 
+  const reportMutation = useMutation({
+    mutationFn: async ({ commentId, reason }: { commentId: string; reason: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { error } = await supabase
+        .from("forum_reports")
+        .insert({
+          user_id: user.id,
+          target_id: commentId,
+          target_type: 'product_comment',
+          reason,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        description: "Reporte enviado exitosamente",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        description: "Error al enviar el reporte",
+      });
+    },
+  });
+
   return (
-    <Card>
+    <Card className="backdrop-blur-sm bg-white/90 shadow-lg">
       <CardHeader>
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Comentarios</h2>
@@ -125,6 +155,7 @@ export const ProductComments = ({
           isLoading={isLoading}
           onVote={(commentId, voteType) => voteMutation.mutate({ commentId, voteType })}
           onReply={(commentId, content) => commentMutation.mutate({ content, parentId: commentId })}
+          onReport={(commentId, reason) => reportMutation.mutate({ commentId, reason })}
           commentSort={commentSort}
         />
       </CardContent>

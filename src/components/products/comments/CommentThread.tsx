@@ -18,6 +18,7 @@ interface CommentThreadProps {
   replies: Comment[];
   onVote: (commentId: string, voteType: boolean) => void;
   onReply: (commentId: string, content: string) => void;
+  onReport: (commentId: string, reason: string) => void;
   sortComments: (comments: Comment[]) => Comment[];
 }
 
@@ -26,14 +27,16 @@ export const CommentThread = ({
   replies,
   onVote,
   onReply,
+  onReport,
   sortComments,
 }: CommentThreadProps) => {
   return (
     <div key={comment.id} className="space-y-4">
       <SingleComment
         comment={comment}
-        onVote={(commentId, voteType) => onVote(commentId, voteType)}
-        onReply={(commentId, content) => onReply(commentId, content)}
+        onVote={onVote}
+        onReply={onReply}
+        onReport={onReport}
         depth={comment.depth}
       />
       {replies.length > 0 && (
@@ -42,8 +45,9 @@ export const CommentThread = ({
             <SingleComment
               key={reply.id}
               comment={reply}
-              onVote={(commentId, voteType) => onVote(commentId, voteType)}
-              onReply={(commentId, content) => onReply(commentId, content)}
+              onVote={onVote}
+              onReply={onReply}
+              onReport={onReport}
               depth={reply.depth}
             />
           ))}
