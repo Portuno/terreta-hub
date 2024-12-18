@@ -21,6 +21,7 @@ interface SingleCommentProps {
   onVote: (commentId: string, voteType: boolean) => void;
   onReply: (commentId: string, content: string) => void;
   depth?: number;
+  type?: 'forum_comment' | 'product_comment';
 }
 
 export const SingleComment = ({ 
@@ -28,7 +29,8 @@ export const SingleComment = ({
   userVote,
   onVote,
   onReply,
-  depth = 0 
+  depth = 0,
+  type = 'product_comment'
 }: SingleCommentProps) => {
   const [isReplying, setIsReplying] = useState(false);
 
@@ -56,10 +58,12 @@ export const SingleComment = ({
           </Link>
         </div>
         <CommentVotes
+          commentId={comment.id}
           upvotes={comment.upvotes}
           downvotes={comment.downvotes}
           userVote={userVote}
           onVote={(voteType) => onVote(comment.id, voteType)}
+          type={type}
         />
       </div>
       <p className="text-gray-600">{comment.content}</p>
