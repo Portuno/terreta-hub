@@ -14,6 +14,7 @@ import FAQ from "./pages/FAQ";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ProductDetail from "./pages/ProductDetail";
+import AdminUsers from "./pages/AdminUsers";
 import { useState } from "react";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/perfil/:username" element={<Profile />} />
             <Route path="/configuraciones" element={<Settings />} />
+            <Route path="/admin/usuarios" element={<AdminUsers />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
