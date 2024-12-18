@@ -680,26 +680,44 @@ export type Database = {
       resources: {
         Row: {
           category: string
+          content_format: string | null
+          course_syllabus: string | null
           created_at: string
           description: string
+          duration: string | null
           id: string
+          instructor: string | null
+          resource_type: string
           title: string
+          url: string | null
           user_id: string
         }
         Insert: {
           category: string
+          content_format?: string | null
+          course_syllabus?: string | null
           created_at?: string
           description: string
+          duration?: string | null
           id?: string
+          instructor?: string | null
+          resource_type?: string
           title: string
+          url?: string | null
           user_id: string
         }
         Update: {
           category?: string
+          content_format?: string | null
+          course_syllabus?: string | null
           created_at?: string
           description?: string
+          duration?: string | null
           id?: string
+          instructor?: string | null
+          resource_type?: string
           title?: string
+          url?: string | null
           user_id?: string
         }
         Relationships: []

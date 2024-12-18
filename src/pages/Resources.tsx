@@ -52,10 +52,6 @@ const Resources = () => {
 
   const isAdmin = userRole === "ADMIN";
 
-  const getResourcesByCategory = (category: string) => {
-    return resources?.filter(resource => resource.category === category) || [];
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -80,7 +76,7 @@ const Resources = () => {
                     category="guide"
                     icon={<BookOpen className="w-6 h-6 text-primary" />}
                     title="Guías"
-                    resources={getResourcesByCategory("guide")}
+                    resources={resources || []}
                     isAdmin={isAdmin}
                     onResourceDeleted={refetchResources}
                   />
@@ -89,7 +85,7 @@ const Resources = () => {
                     category="course"
                     icon={<GraduationCap className="w-6 h-6 text-accent" />}
                     title="Cursos"
-                    resources={getResourcesByCategory("course")}
+                    resources={resources || []}
                     isAdmin={isAdmin}
                     onResourceDeleted={refetchResources}
                   />
@@ -98,7 +94,7 @@ const Resources = () => {
                     category="link"
                     icon={<Link className="w-6 h-6 text-primary" />}
                     title="Enlaces Útiles"
-                    resources={getResourcesByCategory("link")}
+                    resources={resources || []}
                     isAdmin={isAdmin}
                     onResourceDeleted={refetchResources}
                   />
