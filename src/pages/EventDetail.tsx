@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
-import { Calendar, MapPin, Users, Check, QuestionMark, X } from "lucide-react";
+import { Calendar, MapPin, Users, Check, HelpCircle, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -219,7 +219,7 @@ const EventDetail = () => {
                   width="100%"
                   height="100%"
                   frameBorder="0"
-                  src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${event.location}`}
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBLCQr3lBQUxFzTc4IxSpDyPNpKlFvJQLY&q=${event.location}`}
                   allowFullScreen
                   className="rounded-lg"
                 />
@@ -236,7 +236,7 @@ const EventDetail = () => {
                       <span>{attendeesCount} asistirán</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <QuestionMark size={16} className="text-yellow-500" />
+                      <HelpCircle size={16} className="text-yellow-500" />
                       <span>{maybeCount} tal vez</span>
                     </div>
                     <div className="flex items-center gap-2">
