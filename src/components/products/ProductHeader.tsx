@@ -32,12 +32,22 @@ export const ProductHeader = ({ product }: ProductHeaderProps) => {
   const { data: voteData } = useQuery({
     queryKey: ["product-vote", product.id],
     queryFn: async () => {
-      const { data: userVote } = await supabase
-        .from("product_votes")
-        .select("vote_type")
-        .eq("product_id", product.id)
-        .single();
+      const { data: { user } } = await supabase.auth.getUser();
 
+      // First get the user's vote if they're logged in
+      let userVote = null;
+      if (user) {
+        const { data: voteData } = await supabase
+          .from("product_votes")
+          .select("vote_type")
+          .eq("product_id", product.id)
+          .eq("user_id", user.id)
+          .maybeSingle(); // Use maybeSingle instead of single
+
+        userVote = voteData?.vote_type;
+      }
+
+      // Then get the vote counts
       const { data: voteCounts } = await supabase
         .from("products")
         .select("upvotes, downvotes")
@@ -45,7 +55,7 @@ export const ProductHeader = ({ product }: ProductHeaderProps) => {
         .single();
 
       return {
-        userVote: userVote?.vote_type,
+        userVote,
         upvotes: voteCounts?.upvotes || 0,
         downvotes: voteCounts?.downvotes || 0,
       };
