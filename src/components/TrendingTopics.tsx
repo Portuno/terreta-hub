@@ -7,17 +7,30 @@ export const TrendingTopics = () => {
   const { data: topics, isLoading } = useQuery({
     queryKey: ["trendingTopics"],
     queryFn: async () => {
+      console.log('Fetching trending topics with comment counts');
       const { data, error } = await supabase
         .from("forum_topics")
         .select(`
           *,
-          profile:profiles!fk_forum_topics_profile (username)
+          profile:profiles!fk_forum_topics_profile (username),
+          comments:forum_comments (count)
         `)
         .order("views", { ascending: false })
         .limit(6);
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching trending topics:', error);
+        throw error;
+      }
+
+      // Transform the data to include the comment count
+      const topicsWithCommentCount = data.map(topic => ({
+        ...topic,
+        replies: topic.comments[0].count
+      }));
+
+      console.log('Fetched topics with comment counts:', topicsWithCommentCount);
+      return topicsWithCommentCount;
     },
   });
 
