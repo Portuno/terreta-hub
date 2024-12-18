@@ -151,28 +151,34 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          downvotes: number | null
           id: string
           media_urls: string[] | null
           topic_id: string
           updated_at: string
+          upvotes: number | null
           user_id: string
         }
         Insert: {
           content: string
           created_at?: string
+          downvotes?: number | null
           id?: string
           media_urls?: string[] | null
           topic_id: string
           updated_at?: string
+          upvotes?: number | null
           user_id: string
         }
         Update: {
           content?: string
           created_at?: string
+          downvotes?: number | null
           id?: string
           media_urls?: string[] | null
           topic_id?: string
           updated_at?: string
+          upvotes?: number | null
           user_id?: string
         }
         Relationships: [

@@ -18,9 +18,25 @@ export const ProductVotes = ({ productId, userVote, upvotes, downvotes }: Produc
 
   const voteMutation = useMutation({
     mutationFn: async ({ voteType }: { voteType: boolean }) => {
+      console.log('Registrando voto:', { productId, voteType });
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      // Si ya existe un voto del mismo tipo, lo eliminamos
+      if (userVote === voteType) {
+        console.log('Eliminando voto existente');
+        const { error: deleteError } = await supabase
+          .from("product_votes")
+          .delete()
+          .eq("product_id", productId)
+          .eq("user_id", user.id);
+
+        if (deleteError) throw deleteError;
+        return;
+      }
+
+      // Si existe un voto pero de tipo diferente, o no existe voto, primero eliminamos cualquier voto existente
+      console.log('Eliminando votos previos si existen');
       const { error: deleteError } = await supabase
         .from("product_votes")
         .delete()
@@ -29,23 +45,31 @@ export const ProductVotes = ({ productId, userVote, upvotes, downvotes }: Produc
 
       if (deleteError) throw deleteError;
 
-      const { error: insertError } = await supabase
-        .from("product_votes")
-        .insert({
-          product_id: productId,
-          user_id: user.id,
-          vote_type: voteType,
-        });
+      // Si estábamos eliminando un voto del mismo tipo, no insertamos uno nuevo
+      if (userVote !== voteType) {
+        console.log('Insertando nuevo voto');
+        const { error: insertError } = await supabase
+          .from("product_votes")
+          .insert({
+            product_id: productId,
+            user_id: user.id,
+            vote_type: voteType,
+          });
 
-      if (insertError) throw insertError;
+        if (insertError) throw insertError;
+      }
     },
     onSuccess: () => {
+      // Invalidamos tanto la consulta del producto como la del voto específico
+      console.log('Invalidando cachés');
+      queryClient.invalidateQueries({ queryKey: ["product", productId] });
       queryClient.invalidateQueries({ queryKey: ["product-vote", productId] });
       toast({
         description: "Tu voto ha sido registrado",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error al votar:', error);
       toast({
         variant: "destructive",
         description: "Error al registrar tu voto",
