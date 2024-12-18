@@ -7,6 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CourseFields } from "./form/CourseFields";
+import { GuideFields } from "./form/GuideFields";
+import { LinkFields } from "./form/LinkFields";
 
 interface ResourceDialogProps {
   isOpen: boolean;
@@ -30,7 +33,6 @@ export const ResourceDialog = ({ isOpen, onOpenChange, onResourceCreated }: Reso
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      // Validación específica por tipo
       if (resourceType === 'link' && !url) {
         toast({
           title: "Error",
@@ -45,7 +47,7 @@ export const ResourceDialog = ({ isOpen, onOpenChange, onResourceCreated }: Reso
         .insert({
           title,
           description,
-          category: resourceType, // Agregamos category para que coincida con resource_type
+          category: resourceType,
           resource_type: resourceType,
           url,
           instructor: resourceType === 'course' ? instructor : null,
@@ -125,76 +127,27 @@ export const ResourceDialog = ({ isOpen, onOpenChange, onResourceCreated }: Reso
           </div>
 
           {resourceType === 'link' && (
-            <div>
-              <Label htmlFor="url">URL del Enlace</Label>
-              <Input
-                id="url"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://ejemplo.com"
-                required
-              />
-            </div>
+            <LinkFields url={url} setUrl={setUrl} />
           )}
 
           {resourceType === 'course' && (
-            <>
-              <div>
-                <Label htmlFor="instructor">Instructor</Label>
-                <Input
-                  id="instructor"
-                  value={instructor}
-                  onChange={(e) => setInstructor(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="courseSyllabus">Programa del Curso</Label>
-                <Textarea
-                  id="courseSyllabus"
-                  value={courseSyllabus}
-                  onChange={(e) => setCourseSyllabus(e.target.value)}
-                  rows={5}
-                />
-              </div>
-            </>
+            <CourseFields
+              instructor={instructor}
+              setInstructor={setInstructor}
+              courseSyllabus={courseSyllabus}
+              setCourseSyllabus={setCourseSyllabus}
+            />
           )}
 
           {resourceType === 'guide' && (
-            <>
-              <div>
-                <Label htmlFor="contentFormat">Formato del Contenido</Label>
-                <Select value={contentFormat} onValueChange={setContentFormat}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Texto</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                    <SelectItem value="audio">Audio</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="url">URL del Contenido</Label>
-                <Input
-                  id="url"
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="URL del contenido (video, audio o documento)"
-                />
-              </div>
-              <div>
-                <Label htmlFor="duration">Duración</Label>
-                <Input
-                  id="duration"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="Ej: 5 minutos, 1 hora"
-                />
-              </div>
-            </>
+            <GuideFields
+              contentFormat={contentFormat}
+              setContentFormat={setContentFormat}
+              url={url}
+              setUrl={setUrl}
+              duration={duration}
+              setDuration={setDuration}
+            />
           )}
 
           <Button onClick={handleCreateResource} className="w-full">
