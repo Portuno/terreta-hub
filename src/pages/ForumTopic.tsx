@@ -10,6 +10,7 @@ import { ArrowUp, ArrowDown, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Loader2 } from "lucide-react";
+import { UserBadge } from "@/components/profile/UserBadge";
 
 const ForumTopic = () => {
   const { id } = useParams();
@@ -23,7 +24,12 @@ const ForumTopic = () => {
         .from("forum_topics")
         .select(`
           *,
-          profile:profiles!fk_forum_topics_profile (username, avatar_url, id)
+          profile:profiles!fk_forum_topics_profile (
+            username, 
+            avatar_url, 
+            id,
+            reputation
+          )
         `)
         .eq("id", id)
         .single();
@@ -40,7 +46,12 @@ const ForumTopic = () => {
         .from("forum_comments")
         .select(`
           *,
-          profile:profiles!fk_forum_comments_profile (username, avatar_url, id)
+          profile:profiles!fk_forum_comments_profile (
+            username, 
+            avatar_url, 
+            id,
+            reputation
+          )
         `)
         .eq("topic_id", id)
         .order("created_at", { ascending: true });
@@ -116,13 +127,18 @@ const ForumTopic = () => {
               </Avatar>
               <div>
                 <h1 className="text-2xl font-bold">{topic.title}</h1>
-                <Link
-                  to={`/perfil/${topic.profile?.username}`}
-                  className="text-sm text-gray-500 hover:underline flex items-center gap-1"
-                >
-                  <User size={14} />
-                  {topic.profile?.username}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/perfil/${topic.profile?.username}`}
+                    className="text-sm text-gray-500 hover:underline flex items-center gap-1"
+                  >
+                    <User size={14} />
+                    {topic.profile?.username}
+                  </Link>
+                  {topic.profile?.reputation !== undefined && (
+                    <UserBadge reputation={topic.profile.reputation} />
+                  )}
+                </div>
               </div>
             </div>
             <p className="mt-4">{topic.content}</p>
@@ -151,6 +167,9 @@ const ForumTopic = () => {
                         >
                           {comment.profile?.username}
                         </Link>
+                        {comment.profile?.reputation !== undefined && (
+                          <UserBadge reputation={comment.profile.reputation} />
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm">
