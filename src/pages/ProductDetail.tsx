@@ -79,10 +79,10 @@ const ProductDetail = () => {
 
   if (productLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
         <Navbar />
         <div className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -90,11 +90,11 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
         <Navbar />
         <div className="pt-16 container mx-auto px-4">
           <div className="text-center py-12">
-            <h1 className="text-2xl font-bold">Producto no encontrado</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Producto no encontrado</h1>
             <p className="text-gray-600 mt-2">
               El producto que buscas no existe o ha sido eliminado.
             </p>
@@ -105,14 +105,14 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
       <Navbar />
       <div className="pt-16 container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+          <div className="space-y-6">
             <ProductHeader product={product} />
           </div>
-          <div>
+          <div className="space-y-6">
             <ProductComments 
               comments={comments}
               isLoading={commentsLoading}
