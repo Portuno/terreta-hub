@@ -30,11 +30,7 @@ const EventDetail = () => {
         .from("events")
         .select(`
           *,
-          profiles:user_id (
-            username,
-            avatar_url
-          ),
-          attendances:event_attendances (
+          event_attendances (
             status,
             is_public,
             profiles:user_id (
@@ -42,7 +38,7 @@ const EventDetail = () => {
               avatar_url
             )
           ),
-          comments:event_comments (
+          event_comments (
             id,
             content,
             created_at,
@@ -66,13 +62,14 @@ const EventDetail = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("event_attendances")
         .select("*")
         .eq("event_id", id)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
+      if (error) throw error;
       return data;
     },
   });
@@ -165,15 +162,15 @@ const EventDetail = () => {
     );
   }
 
-  const attendeesCount = event.attendances?.filter(
+  const attendeesCount = event.event_attendances?.filter(
     (a) => a.status === "attending"
   ).length || 0;
 
-  const maybeCount = event.attendances?.filter(
+  const maybeCount = event.event_attendances?.filter(
     (a) => a.status === "maybe"
   ).length || 0;
 
-  const notAttendingCount = event.attendances?.filter(
+  const notAttendingCount = event.event_attendances?.filter(
     (a) => a.status === "not_attending"
   ).length || 0;
 
@@ -287,7 +284,7 @@ const EventDetail = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold">Asistentes confirmados</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {event.attendances
+                  {event.event_attendances
                     ?.filter((a) => a.is_public && a.status === "attending")
                     .map((attendance) => (
                       <div
@@ -321,7 +318,7 @@ const EventDetail = () => {
               />
 
               <div className="space-y-4">
-                {event.comments
+                {event.event_comments
                   ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                   .map((comment) => (
                     <div key={comment.id} className="border-b pb-4">
