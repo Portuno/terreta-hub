@@ -1,7 +1,3 @@
-import { User, Settings, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "./ui/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +6,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
+import { NotificationIndicator } from "./notifications/NotificationIndicator";
 
 interface UserMenuProps {
   username: string;
@@ -19,38 +16,33 @@ interface UserMenuProps {
 
 export const UserMenu = ({ username, onLogout }: UserMenuProps) => {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-primary/10">
-              {username ? username.substring(0, 2).toUpperCase() : "U"}
+    <div className="flex items-center gap-2">
+      <NotificationIndicator />
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger className="focus:outline-none">
+          <Avatar>
+            <AvatarFallback>
+              {username.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end">
-        <DropdownMenuItem asChild>
-          <Link to={`/perfil/${username}`} className="flex items-center">
-            <User className="mr-2 h-4 w-4" />
-            <span>Ver Perfil</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/configuraciones" className="flex items-center">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Configuraciones</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={onLogout}
-          className="text-red-600 focus:text-red-600 focus:bg-red-50"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Cerrar Sesión</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link to={`/perfil/${username}`}>Ver Perfil</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/configuraciones">Configuraciones</Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-red-600 focus:text-red-600"
+            onClick={onLogout}
+          >
+            Cerrar Sesión
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
