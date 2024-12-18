@@ -1,84 +1,42 @@
 import { useState } from "react";
-import { Navbar } from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { Navbar } from "@/components/Navbar";
 import { ForumHeader } from "@/components/forum/ForumHeader";
-import { TimeFilter } from "@/components/forum/TimeFilter";
 import { TopicList } from "@/components/forum/TopicList";
 import { NewTopicDialog } from "@/components/forum/NewTopicDialog";
-import { Footer } from "@/components/Footer";
-
-interface Profile {
-  username: string;
-}
-
-interface ForumTopic {
-  id: string;
-  title: string;
-  content: string;
-  user_id: string;
-  views: number | null;
-  replies: number | null;
-  created_at: string;
-  upvotes: number | null;
-  downvotes: number | null;
-  profile: Profile;
-}
+import { useQuery } from "@tanstack/react-query";
 
 const Forum = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [timeFilter, setTimeFilter] = useState("all");
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const [isNewTopicOpen, setIsNewTopicOpen] = useState(false);
+  const [newTopicTitle, setNewTopicTitle] = useState("");
+  const [newTopicContent, setNewTopicContent] = useState("");
 
-  const { data: topics = [], refetch } = useQuery<ForumTopic[]>({
-    queryKey: ['forum-topics', timeFilter],
+  const { data: topics, isLoading } = useQuery({
+    queryKey: ["forum-topics"],
     queryFn: async () => {
-      console.log('Fetching forum topics with timeFilter:', timeFilter);
-      let query = supabase
-        .from('forum_topics')
+      const { data, error } = await supabase
+        .from("forum_topics")
         .select(`
           *,
-          profile:profiles!fk_forum_topics_profile (username)
-        `);
+          profile:profiles!fk_forum_topics_profile (
+            username,
+            avatar_url,
+            reputation
+          )
+        `)
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false });
 
-      if (timeFilter !== 'all') {
-        const now = new Date();
-        let startDate = new Date();
-        
-        switch (timeFilter) {
-          case 'week':
-            startDate.setDate(now.getDate() - 7);
-            break;
-          case 'month':
-            startDate.setMonth(now.getMonth() - 1);
-            break;
-          case 'year':
-            startDate.setFullYear(now.getFullYear() - 1);
-            break;
-        }
-        
-        query = query.gte('created_at', startDate.toISOString());
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching topics:", error);
-        throw error;
-      }
-
-      console.log('Fetched topics:', data);
-      return (data as any[]).map(topic => ({
-        ...topic,
-        profile: topic.profile || { username: 'Usuario Anónimo' }
-      }));
-    }
+      if (error) throw error;
+      return data;
+    },
   });
 
-  const handleSubmit = async () => {
+  const handleCreateTopic = async () => {
     try {
       const {
         data: { user },
@@ -86,64 +44,108 @@ const Forum = () => {
 
       if (!user) {
         toast({
-          title: "Error",
-          description: "Debes iniciar sesión para crear un tema",
           variant: "destructive",
+          description: "Debes iniciar sesión para crear un debate",
         });
         return;
       }
 
-      const { error } = await supabase.from("forum_topics").insert({
-        title,
-        content,
-        user_id: user.id,
-        media_urls: [],
-      });
+      const { data: topic, error: topicError } = await supabase
+        .from("forum_topics")
+        .insert({
+          title: newTopicTitle,
+          content: newTopicContent,
+          user_id: user.id,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (topicError) throw topicError;
+
+      // Si hay una encuesta, la creamos
+      if (includePoll && pollData.title && pollData.options.length >= 2) {
+        // Crear la encuesta
+        const { data: poll, error: pollError } = await supabase
+          .from("polls")
+          .insert({
+            title: pollData.title,
+            description: pollData.description,
+            topic_id: topic.id,
+            user_id: user.id,
+            is_multiple_choice: pollData.isMultipleChoice,
+            ends_at: pollData.endsAt,
+          })
+          .select()
+          .single();
+
+        if (pollError) throw pollError;
+
+        // Crear las opciones de la encuesta
+        const pollOptions = pollData.options
+          .filter(option => option.trim() !== "")
+          .map(option => ({
+            poll_id: poll.id,
+            option_text: option,
+          }));
+
+        const { error: optionsError } = await supabase
+          .from("poll_options")
+          .insert(pollOptions);
+
+        if (optionsError) throw optionsError;
+      }
 
       toast({
-        title: "¡Éxito!",
-        description: "Tu tema ha sido creado",
+        description: "Debate creado exitosamente",
       });
 
-      setIsOpen(false);
-      setTitle("");
-      setContent("");
-      refetch();
+      setIsNewTopicOpen(false);
+      setNewTopicTitle("");
+      setNewTopicContent("");
+      navigate(`/foro/${topic.id}`);
     } catch (error) {
       console.error("Error creating topic:", error);
       toast({
-        title: "Error",
-        description: "No se pudo crear el tema",
         variant: "destructive",
+        description: "Error al crear el debate",
       });
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-      <div className="pt-16 flex-grow">
-        <main className="container mx-auto py-8 px-4">
-          <div className="animate-fade-in">
-            <ForumHeader onNewTopic={() => setIsOpen(true)} />
-            <TimeFilter value={timeFilter} onValueChange={setTimeFilter} />
-            <TopicList topics={topics} />
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-24 bg-gray-200 rounded"></div>
+              ))}
+            </div>
           </div>
-        </main>
+        </div>
       </div>
-      <Footer />
+    );
+  }
 
-      <NewTopicDialog
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-        title={title}
-        content={content}
-        onTitleChange={setTitle}
-        onContentChange={setContent}
-        onSubmit={handleSubmit}
-      />
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <ForumHeader onNewTopic={() => setIsNewTopicOpen(true)} />
+        {topics && <TopicList topics={topics} />}
+        <NewTopicDialog
+          isOpen={isNewTopicOpen}
+          onOpenChange={setIsNewTopicOpen}
+          title={newTopicTitle}
+          content={newTopicContent}
+          onTitleChange={setNewTopicTitle}
+          onContentChange={setNewTopicContent}
+          onSubmit={handleCreateTopic}
+        />
+      </div>
     </div>
   );
 };
