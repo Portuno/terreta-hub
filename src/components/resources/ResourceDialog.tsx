@@ -45,6 +45,7 @@ export const ResourceDialog = ({ isOpen, onOpenChange, onResourceCreated }: Reso
         .insert({
           title,
           description,
+          category: resourceType, // Agregamos category para que coincida con resource_type
           resource_type: resourceType,
           url,
           instructor: resourceType === 'course' ? instructor : null,
