@@ -30,6 +30,87 @@ export type Database = {
         }
         Relationships: []
       }
+      event_attendances: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          is_public: boolean | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          is_public?: boolean | null
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          is_public?: boolean | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendances_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_attendances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_comments: {
+        Row: {
+          content: string
+          created_at: string
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -37,6 +118,8 @@ export type Database = {
           event_date: string
           id: string
           location: string
+          location_coordinates: unknown | null
+          location_link: string | null
           title: string
           user_id: string
         }
@@ -46,6 +129,8 @@ export type Database = {
           event_date: string
           id?: string
           location: string
+          location_coordinates?: unknown | null
+          location_link?: string | null
           title: string
           user_id: string
         }
@@ -55,6 +140,8 @@ export type Database = {
           event_date?: string
           id?: string
           location?: string
+          location_coordinates?: unknown | null
+          location_link?: string | null
           title?: string
           user_id?: string
         }

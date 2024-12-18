@@ -8,6 +8,7 @@ import Products from "./pages/Products";
 import NewProduct from "./pages/NewProduct";
 import Resources from "./pages/Resources";
 import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
 import Forum from "./pages/Forum";
 import ForumTopic from "./pages/ForumTopic";
 import FAQ from "./pages/FAQ";
@@ -33,6 +34,7 @@ function App() {
             <Route path="/productos/:id" element={<ProductDetail />} />
             <Route path="/recursos" element={<Resources />} />
             <Route path="/eventos" element={<Events />} />
+            <Route path="/eventos/:id" element={<EventDetail />} />
             <Route path="/foro" element={<Forum />} />
             <Route path="/foro/:id" element={<ForumTopic />} />
             <Route path="/faq" element={<FAQ />} />
