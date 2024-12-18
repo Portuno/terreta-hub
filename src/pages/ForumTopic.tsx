@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Navbar } from "../components/Navbar";
@@ -8,13 +8,14 @@ import { Loader2 } from "lucide-react";
 import { TopicHeader } from "@/components/forum/TopicHeader";
 import { CommentList } from "@/components/forum/CommentList";
 import { CommentForm } from "@/components/forum/CommentForm";
+import { PollSection } from "@/components/forum/PollSection";
 
 const ForumTopic = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const [newComment, setNewComment] = useState("");
 
-  const { data: topic } = useQuery({
+  const { data: topic, isLoading: isTopicLoading } = useQuery({
     queryKey: ["forum-topic", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,6 +34,47 @@ const ForumTopic = () => {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: poll, isLoading: isPollLoading } = useQuery({
+    queryKey: ["forum-poll", id],
+    queryFn: async () => {
+      const { data: pollData, error: pollError } = await supabase
+        .from("polls")
+        .select(`
+          *,
+          options:poll_options(*)
+        `)
+        .eq("topic_id", id)
+        .single();
+
+      if (pollError) {
+        if (pollError.code === "PGRST116") {
+          // No poll found for this topic
+          return null;
+        }
+        throw pollError;
+      }
+
+      // Get vote counts for each option
+      if (pollData) {
+        const { data: voteCounts, error: voteError } = await supabase
+          .from("poll_votes")
+          .select("option_id, count", { count: "exact" })
+          .eq("poll_id", pollData.id)
+          .group_by("option_id");
+
+        if (voteError) throw voteError;
+
+        // Add vote counts to options
+        pollData.options = pollData.options.map(option => ({
+          ...option,
+          votes: voteCounts?.find(vc => vc.option_id === option.id)?.count || 0
+        }));
+      }
+
+      return pollData;
     },
   });
 
@@ -98,12 +140,23 @@ const ForumTopic = () => {
     }
   };
 
-  if (!topic) {
+  if (isTopicLoading || isPollLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!topic) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-16 container mx-auto px-4">
+          <p className="text-center text-gray-500">Tema no encontrado</p>
         </div>
       </div>
     );
@@ -115,6 +168,18 @@ const ForumTopic = () => {
       <div className="pt-16">
         <main className="container mx-auto py-8 px-4">
           <TopicHeader topic={topic} />
+          
+          {poll && (
+            <PollSection 
+              poll={poll} 
+              onVote={() => {
+                // Refetch poll data after voting
+                const queryClient = useQueryClient();
+                queryClient.invalidateQueries({ queryKey: ["forum-poll", id] });
+              }}
+            />
+          )}
+
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-lg font-semibold mb-4">Comentarios</h2>
             {comments && comments.length > 0 ? (
