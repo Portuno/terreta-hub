@@ -1,68 +1,23 @@
-import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { Navbar } from "../components/Navbar";
+import { Navbar } from "@/components/Navbar";
 import { Loader2 } from "lucide-react";
 import { TopicHeader } from "@/components/forum/TopicHeader";
-import { CommentList } from "@/components/forum/CommentList";
-import { CommentForm } from "@/components/forum/CommentForm";
+import { TopicComments } from "@/components/forum/TopicComments";
 import { PollSection } from "@/components/forum/PollSection";
 import { Stats } from "@/components/Stats";
+import { useForumTopicData } from "@/hooks/useForumTopicData";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const ForumTopic = () => {
   const { id } = useParams();
-  const { toast } = useToast();
-  const [newComment, setNewComment] = useState("");
+  if (!id) return null;
 
-  const { data: topic, isLoading: isTopicLoading } = useQuery({
-    queryKey: ["forum-topic", id],
-    queryFn: async () => {
-      console.log('Fetching forum topic:', id);
-      
-      const { data, error } = await supabase
-        .from("forum_topics")
-        .select(`
-          *,
-          profile:profiles!fk_forum_topics_profile (
-            username, 
-            avatar_url, 
-            id,
-            reputation
-          ),
-          votes:forum_votes (
-            vote_type,
-            user_id
-          )
-        `)
-        .eq("id", id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching topic:', error);
-        throw error;
-      }
-
-      // Increment view count
-      const { error: updateError } = await supabase
-        .from("forum_topics")
-        .update({ views: (data.views || 0) + 1 })
-        .eq("id", id);
-
-      if (updateError) {
-        console.error('Error updating view count:', updateError);
-      }
-
-      console.log('Topic fetched:', data);
-      return data;
-    },
-  });
+  const { data: topic, isLoading: isTopicLoading } = useForumTopicData(id);
 
   const { data: poll } = useQuery({
     queryKey: ["forum-poll", id],
     queryFn: async () => {
-      // Primero obtenemos la encuesta
       const { data: pollData, error: pollError } = await supabase
         .from("polls")
         .select(`
@@ -74,10 +29,8 @@ const ForumTopic = () => {
 
       if (pollError) throw pollError;
       
-      // Si no hay encuesta, retornamos null
       if (!pollData) return null;
 
-      // Obtenemos los votos para cada opción
       const { data: voteData, error: voteError } = await supabase
         .from("poll_votes")
         .select('option_id, count', { count: 'exact' })
@@ -85,7 +38,6 @@ const ForumTopic = () => {
 
       if (voteError) throw voteError;
 
-      // Agregamos el conteo de votos a cada opción
       pollData.options = pollData.options.map(option => ({
         ...option,
         votes: voteData?.filter(v => v.option_id === option.id).length || 0
@@ -94,84 +46,6 @@ const ForumTopic = () => {
       return pollData;
     },
   });
-
-  const { data: comments, refetch: refetchComments } = useQuery({
-    queryKey: ["forum-comments", id],
-    queryFn: async () => {
-      console.log('Fetching forum comments');
-      
-      const { data, error } = await supabase
-        .from("forum_comments")
-        .select(`
-          *,
-          profile:profiles!fk_forum_comments_profile (
-            username, 
-            avatar_url, 
-            id,
-            reputation
-          ),
-          votes:forum_votes (
-            vote_type,
-            user_id
-          )
-        `)
-        .eq("topic_id", id)
-        .order("created_at", { ascending: true });
-
-      if (error) {
-        console.error('Error fetching comments:', error);
-        throw error;
-      }
-
-      console.log('Comments fetched:', data);
-      return data;
-    },
-  });
-
-  const handleCommentSubmit = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "Debes iniciar sesión para comentar",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Creating new comment');
-      
-      const { error } = await supabase.from("forum_comments").insert({
-        content: newComment,
-        topic_id: id,
-        user_id: user.id,
-      });
-
-      if (error) {
-        console.error('Error creating comment:', error);
-        throw error;
-      }
-
-      toast({
-        title: "¡Éxito!",
-        description: "Tu comentario ha sido publicado",
-      });
-
-      setNewComment("");
-      refetchComments();
-    } catch (error) {
-      console.error("Error creating comment:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo publicar el comentario",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (isTopicLoading) {
     return (
@@ -205,27 +79,14 @@ const ForumTopic = () => {
           
           {poll && (
             <PollSection 
-              poll={poll} 
+              poll={poll}
               onVote={() => {
-                const queryClient = useQueryClient();
                 queryClient.invalidateQueries({ queryKey: ["forum-poll", id] });
               }}
             />
           )}
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Comentarios</h2>
-            {comments && comments.length > 0 ? (
-              <CommentList comments={comments} />
-            ) : (
-              <p className="text-gray-500">No hay comentarios aún.</p>
-            )}
-            <CommentForm
-              newComment={newComment}
-              onCommentChange={setNewComment}
-              onSubmit={handleCommentSubmit}
-            />
-          </div>
+          <TopicComments topicId={id} />
         </main>
       </div>
     </div>
