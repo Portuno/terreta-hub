@@ -37,9 +37,10 @@ const ForumTopic = () => {
     },
   });
 
-  const { data: poll, isLoading: isPollLoading } = useQuery({
+  const { data: poll } = useQuery({
     queryKey: ["forum-poll", id],
     queryFn: async () => {
+      // Primero obtenemos la encuesta
       const { data: pollData, error: pollError } = await supabase
         .from("polls")
         .select(`
@@ -47,32 +48,26 @@ const ForumTopic = () => {
           options:poll_options(*)
         `)
         .eq("topic_id", id)
-        .single();
+        .maybeSingle();
 
-      if (pollError) {
-        if (pollError.code === "PGRST116") {
-          // No poll found for this topic
-          return null;
-        }
-        throw pollError;
-      }
+      if (pollError) throw pollError;
+      
+      // Si no hay encuesta, retornamos null
+      if (!pollData) return null;
 
-      // Get vote counts for each option
-      if (pollData) {
-        const { data: voteCounts, error: voteError } = await supabase
-          .from("poll_votes")
-          .select("option_id, count", { count: "exact" })
-          .eq("poll_id", pollData.id)
-          .group_by("option_id");
+      // Obtenemos los votos para cada opción
+      const { data: voteData, error: voteError } = await supabase
+        .from("poll_votes")
+        .select('option_id, count', { count: 'exact' })
+        .eq('poll_id', pollData.id);
 
-        if (voteError) throw voteError;
+      if (voteError) throw voteError;
 
-        // Add vote counts to options
-        pollData.options = pollData.options.map(option => ({
-          ...option,
-          votes: voteCounts?.find(vc => vc.option_id === option.id)?.count || 0
-        }));
-      }
+      // Agregamos el conteo de votos a cada opción
+      pollData.options = pollData.options.map(option => ({
+        ...option,
+        votes: voteData?.filter(v => v.option_id === option.id).length || 0
+      }));
 
       return pollData;
     },
@@ -140,7 +135,7 @@ const ForumTopic = () => {
     }
   };
 
-  if (isTopicLoading || isPollLoading) {
+  if (isTopicLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -173,7 +168,6 @@ const ForumTopic = () => {
             <PollSection 
               poll={poll} 
               onVote={() => {
-                // Refetch poll data after voting
                 const queryClient = useQueryClient();
                 queryClient.invalidateQueries({ queryKey: ["forum-poll", id] });
               }}
