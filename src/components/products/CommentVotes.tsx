@@ -1,15 +1,28 @@
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useVoteSubscription } from "@/hooks/useVoteSubscription";
 
 interface CommentVotesProps {
+  commentId: string;
   upvotes: number;
   downvotes: number;
   userVote?: boolean | null;
   onVote: (voteType: boolean) => void;
+  type: 'forum_comment' | 'product_comment';
 }
 
-export const CommentVotes = ({ upvotes, downvotes, userVote, onVote }: CommentVotesProps) => {
+export const CommentVotes = ({ 
+  commentId, 
+  upvotes, 
+  downvotes, 
+  userVote, 
+  onVote,
+  type 
+}: CommentVotesProps) => {
   const voteBalance = upvotes - downvotes;
+  
+  // Subscribe to vote changes
+  useVoteSubscription(type, commentId);
   
   return (
     <div className="flex items-center gap-2">

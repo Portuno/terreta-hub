@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
+import { CommentVotes } from "@/components/products/CommentVotes";
 
 interface TopicListProps {
   topics: any[];
@@ -25,14 +26,15 @@ export const TopicList = ({ topics }: TopicListProps) => {
                       <MessageSquare className="h-4 w-4" />
                       {topic.replies || 0} comentarios
                     </span>
-                    <span className="flex items-center gap-1">
-                      <ThumbsUp className="h-4 w-4" />
-                      {topic.upvotes || 0}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <ThumbsDown className="h-4 w-4" />
-                      {topic.downvotes || 0}
-                    </span>
+                    <CommentVotes
+                      commentId={topic.id}
+                      upvotes={topic.upvotes || 0}
+                      downvotes={topic.downvotes || 0}
+                      type="forum_comment"
+                      onVote={(voteType) => {
+                        // Handle vote logic here
+                      }}
+                    />
                     <span>
                       por {topic.profile?.username}
                     </span>

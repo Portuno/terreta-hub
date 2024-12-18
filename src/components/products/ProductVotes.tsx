@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useVoteSubscription } from "@/hooks/useVoteSubscription";
 
 interface ProductVotesProps {
   productId: string;
@@ -15,6 +16,9 @@ export const ProductVotes = ({ productId, userVote, upvotes, downvotes }: Produc
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const voteBalance = upvotes - downvotes;
+
+  // Subscribe to vote changes
+  useVoteSubscription('product', productId);
 
   const voteMutation = useMutation({
     mutationFn: async ({ voteType }: { voteType: boolean }) => {
