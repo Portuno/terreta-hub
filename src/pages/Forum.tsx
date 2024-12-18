@@ -5,6 +5,7 @@ import { ForumHeader } from "@/components/forum/ForumHeader";
 import { TopicList } from "@/components/forum/TopicList";
 import { NewTopicDialog } from "@/components/forum/NewTopicDialog";
 import { useForumTopic } from "@/hooks/useForumTopic";
+import { Stats } from "@/components/Stats";
 
 const Forum = () => {
   const {
@@ -62,6 +63,9 @@ const Forum = () => {
       <div className="container mx-auto px-4 py-8">
         <ForumHeader onNewTopic={() => setIsNewTopicOpen(true)} />
         {topics && <TopicList topics={topics} />}
+        <div className="mt-8">
+          <Stats context="forum" />
+        </div>
         <NewTopicDialog
           isOpen={isNewTopicOpen}
           onOpenChange={setIsNewTopicOpen}

@@ -2,22 +2,16 @@ import { Users, MessageSquare, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Stats = () => {
+interface StatsProps {
+  context: 'forum' | 'products';
+}
+
+export const Stats = ({ context }: StatsProps) => {
   const { data: stats } = useQuery({
-    queryKey: ["forum-stats"],
+    queryKey: [`${context}-stats`],
     queryFn: async () => {
-      console.log('Fetching forum statistics');
+      console.log(`Fetching ${context} statistics`);
       
-      // Get total topics
-      const { count: topicsCount } = await supabase
-        .from('forum_topics')
-        .select('*', { count: 'exact' });
-
-      // Get total comments
-      const { count: commentsCount } = await supabase
-        .from('forum_comments')
-        .select('*', { count: 'exact' });
-
       // Get active users (users who have posted in the last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -27,13 +21,39 @@ export const Stats = () => {
         .select('*', { count: 'exact' })
         .gt('updated_at', thirtyDaysAgo.toISOString());
 
-      console.log('Forum stats fetched:', { topicsCount, commentsCount, activeUsersCount });
-      
-      return {
-        topics: topicsCount || 0,
-        comments: commentsCount || 0,
-        activeUsers: activeUsersCount || 0
-      };
+      if (context === 'forum') {
+        // Get total topics
+        const { count: topicsCount } = await supabase
+          .from('forum_topics')
+          .select('*', { count: 'exact' });
+
+        // Get total comments
+        const { count: commentsCount } = await supabase
+          .from('forum_comments')
+          .select('*', { count: 'exact' });
+
+        return {
+          topics: topicsCount || 0,
+          comments: commentsCount || 0,
+          activeUsers: activeUsersCount || 0
+        };
+      } else {
+        // Get total products
+        const { count: productsCount } = await supabase
+          .from('products')
+          .select('*', { count: 'exact' });
+
+        // Get total product comments
+        const { count: commentsCount } = await supabase
+          .from('product_comments')
+          .select('*', { count: 'exact' });
+
+        return {
+          products: productsCount || 0,
+          comments: commentsCount || 0,
+          activeUsers: activeUsersCount || 0
+        };
+      }
     },
   });
 
@@ -64,8 +84,12 @@ export const Stats = () => {
           <TrendingUp className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <p className="text-sm text-gray-600">Temas Totales</p>
-          <p className="text-2xl font-bold text-primary">{stats?.topics || 0}</p>
+          <p className="text-sm text-gray-600">
+            {context === 'forum' ? 'Temas Totales' : 'Productos Publicados'}
+          </p>
+          <p className="text-2xl font-bold text-primary">
+            {context === 'forum' ? stats?.topics || 0 : stats?.products || 0}
+          </p>
         </div>
       </div>
     </div>

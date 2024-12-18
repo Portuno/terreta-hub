@@ -178,6 +178,10 @@ const Products = () => {
                 No hay productos disponibles en este momento.
               </p>
             )}
+            
+            <div className="mt-8">
+              <Stats context="products" />
+            </div>
           </div>
         </main>
       </div>

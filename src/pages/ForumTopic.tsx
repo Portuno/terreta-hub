@@ -4,13 +4,14 @@ import { Loader2 } from "lucide-react";
 import { TopicHeader } from "@/components/forum/TopicHeader";
 import { TopicComments } from "@/components/forum/TopicComments";
 import { PollSection } from "@/components/forum/PollSection";
-import { Stats } from "@/components/Stats";
 import { useForumTopicData } from "@/hooks/useForumTopicData";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const ForumTopic = () => {
   const { id } = useParams();
+  const queryClient = useQueryClient();
+  
   if (!id) return null;
 
   const { data: topic, isLoading: isTopicLoading } = useForumTopicData(id);
@@ -74,7 +75,6 @@ const ForumTopic = () => {
       <Navbar />
       <div className="pt-16">
         <main className="container mx-auto py-8 px-4">
-          <Stats />
           <TopicHeader topic={topic} />
           
           {poll && (
