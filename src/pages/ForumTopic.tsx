@@ -9,6 +9,7 @@ import { TopicHeader } from "@/components/forum/TopicHeader";
 import { CommentList } from "@/components/forum/CommentList";
 import { CommentForm } from "@/components/forum/CommentForm";
 import { PollSection } from "@/components/forum/PollSection";
+import { Stats } from "@/components/Stats";
 
 const ForumTopic = () => {
   const { id } = useParams();
@@ -18,6 +19,8 @@ const ForumTopic = () => {
   const { data: topic, isLoading: isTopicLoading } = useQuery({
     queryKey: ["forum-topic", id],
     queryFn: async () => {
+      console.log('Fetching forum topic:', id);
+      
       const { data, error } = await supabase
         .from("forum_topics")
         .select(`
@@ -27,12 +30,31 @@ const ForumTopic = () => {
             avatar_url, 
             id,
             reputation
+          ),
+          votes:forum_votes (
+            vote_type,
+            user_id
           )
         `)
         .eq("id", id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching topic:', error);
+        throw error;
+      }
+
+      // Increment view count
+      const { error: updateError } = await supabase
+        .from("forum_topics")
+        .update({ views: (data.views || 0) + 1 })
+        .eq("id", id);
+
+      if (updateError) {
+        console.error('Error updating view count:', updateError);
+      }
+
+      console.log('Topic fetched:', data);
       return data;
     },
   });
@@ -76,6 +98,8 @@ const ForumTopic = () => {
   const { data: comments, refetch: refetchComments } = useQuery({
     queryKey: ["forum-comments", id],
     queryFn: async () => {
+      console.log('Fetching forum comments');
+      
       const { data, error } = await supabase
         .from("forum_comments")
         .select(`
@@ -85,12 +109,21 @@ const ForumTopic = () => {
             avatar_url, 
             id,
             reputation
+          ),
+          votes:forum_votes (
+            vote_type,
+            user_id
           )
         `)
         .eq("topic_id", id)
         .order("created_at", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching comments:', error);
+        throw error;
+      }
+
+      console.log('Comments fetched:', data);
       return data;
     },
   });
@@ -110,13 +143,18 @@ const ForumTopic = () => {
         return;
       }
 
+      console.log('Creating new comment');
+      
       const { error } = await supabase.from("forum_comments").insert({
         content: newComment,
         topic_id: id,
         user_id: user.id,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating comment:', error);
+        throw error;
+      }
 
       toast({
         title: "¡Éxito!",
@@ -162,6 +200,7 @@ const ForumTopic = () => {
       <Navbar />
       <div className="pt-16">
         <main className="container mx-auto py-8 px-4">
+          <Stats />
           <TopicHeader topic={topic} />
           
           {poll && (
