@@ -82,7 +82,7 @@ const AdminUsers = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Usuario</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>Nombre</TableHead>
                 <TableHead>Rol</TableHead>
                 <TableHead>Fecha de registro</TableHead>
               </TableRow>
@@ -91,7 +91,7 @@ const AdminUsers = () => {
               {users?.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.display_name || user.username}</TableCell>
                   <TableCell>
                     <RoleSelector
                       userId={user.id}
