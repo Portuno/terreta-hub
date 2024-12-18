@@ -9,7 +9,10 @@ export const TrendingTopics = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("forum_topics")
-        .select("*")
+        .select(`
+          *,
+          profile:profiles!fk_forum_topics_profile (username)
+        `)
         .order("views", { ascending: false })
         .limit(6);
       

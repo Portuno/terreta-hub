@@ -36,11 +36,12 @@ const Forum = () => {
   const { data: topics = [], refetch } = useQuery<ForumTopic[]>({
     queryKey: ['forum-topics', timeFilter],
     queryFn: async () => {
+      console.log('Fetching forum topics with timeFilter:', timeFilter);
       let query = supabase
         .from('forum_topics')
         .select(`
           *,
-          profile:profiles(username)
+          profile:profiles!fk_forum_topics_profile (username)
         `);
 
       if (timeFilter !== 'all') {
@@ -69,6 +70,7 @@ const Forum = () => {
         throw error;
       }
 
+      console.log('Fetched topics:', data);
       return (data as any[]).map(topic => ({
         ...topic,
         profile: topic.profile || { username: 'Usuario Anónimo' }
