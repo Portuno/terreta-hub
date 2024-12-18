@@ -88,7 +88,7 @@ const Forum = () => {
             topic_id: topic.id,
             user_id: user.id,
             is_multiple_choice: pollData.isMultipleChoice,
-            ends_at: pollData.endsAt,
+            ends_at: pollData.endsAt?.toISOString(), // Convertimos la fecha a string ISO
           })
           .select()
           .single();
