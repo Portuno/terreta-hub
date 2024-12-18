@@ -8,12 +8,27 @@ import { TopicList } from "@/components/forum/TopicList";
 import { NewTopicDialog } from "@/components/forum/NewTopicDialog";
 import { useQuery } from "@tanstack/react-query";
 
+interface PollData {
+  title: string;
+  description?: string;
+  options: string[];
+  isMultipleChoice: boolean;
+  endsAt?: Date;
+}
+
 const Forum = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isNewTopicOpen, setIsNewTopicOpen] = useState(false);
   const [newTopicTitle, setNewTopicTitle] = useState("");
   const [newTopicContent, setNewTopicContent] = useState("");
+  const [includePoll, setIncludePoll] = useState(false);
+  const [pollData, setPollData] = useState<PollData>({
+    title: "",
+    description: "",
+    options: ["", ""],
+    isMultipleChoice: false,
+  });
 
   const { data: topics, isLoading } = useQuery({
     queryKey: ["forum-topics"],
