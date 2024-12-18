@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./AuthModal";
@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { UserMenu } from "./UserMenu";
 import { MobileMenu } from "./MobileMenu";
+import { SearchBar } from "./SearchBar";
 
 const menuItems = [
   { name: "Inicio", path: "/" },
@@ -88,14 +89,7 @@ export const Navbar = () => {
 
           {/* Search bar */}
           <div className="hidden md:block flex-1 max-w-xl mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="search"
-                placeholder="Buscar..."
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              />
-            </div>
+            <SearchBar />
           </div>
 
           {/* Desktop menu */}
