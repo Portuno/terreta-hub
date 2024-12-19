@@ -49,8 +49,9 @@ export const UserActivity = ({ userId }: UserActivityProps) => {
       const { data, error } = await supabase
         .from("bookmarks")
         .select(`
-          *,
-          forum_topics!inner (
+          id,
+          created_at,
+          forum_topics:forum_topics (
             id,
             title,
             created_at
@@ -61,7 +62,8 @@ export const UserActivity = ({ userId }: UserActivityProps) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Bookmark[];
+      console.log("Bookmarks data:", data); // Debug log
+      return data as unknown as Bookmark[];
     },
   });
 
