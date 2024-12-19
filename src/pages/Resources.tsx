@@ -2,13 +2,12 @@ import { useState } from "react";
 import { Navbar } from "../components/Navbar";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { Sidebar } from "../components/Sidebar";
-import { BookOpen, GraduationCap, Link, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ResourceDialog } from "@/components/resources/ResourceDialog";
-import { ResourceList } from "@/components/resources/ResourceList";
+import { ResourcesHeader } from "@/components/resources/ResourcesHeader";
+import { ResourceGrid } from "@/components/resources/ResourceGrid";
 
 const Resources = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -61,44 +60,16 @@ const Resources = () => {
           <div className="lg:ml-64">
             <main className="container mx-auto py-8 px-4">
               <div className="animate-fade-in">
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-4xl font-bold text-foreground">Recursos</h1>
-                  {isAdmin && (
-                    <Button onClick={() => setIsCreateDialogOpen(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Crear Recurso
-                    </Button>
-                  )}
-                </div>
+                <ResourcesHeader 
+                  isAdmin={isAdmin} 
+                  onCreateClick={() => setIsCreateDialogOpen(true)} 
+                />
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <ResourceList
-                    category="guide"
-                    icon={<BookOpen className="w-6 h-6 text-primary" />}
-                    title="Guías"
-                    resources={resources || []}
-                    isAdmin={isAdmin}
-                    onResourceDeleted={refetchResources}
-                  />
-
-                  <ResourceList
-                    category="course"
-                    icon={<GraduationCap className="w-6 h-6 text-accent" />}
-                    title="Cursos"
-                    resources={resources || []}
-                    isAdmin={isAdmin}
-                    onResourceDeleted={refetchResources}
-                  />
-
-                  <ResourceList
-                    category="link"
-                    icon={<Link className="w-6 h-6 text-primary" />}
-                    title="Enlaces Útiles"
-                    resources={resources || []}
-                    isAdmin={isAdmin}
-                    onResourceDeleted={refetchResources}
-                  />
-                </div>
+                <ResourceGrid
+                  resources={resources || []}
+                  isAdmin={isAdmin}
+                  onResourceDeleted={refetchResources}
+                />
               </div>
             </main>
           </div>
