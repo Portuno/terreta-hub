@@ -9,6 +9,18 @@ interface UserActivityProps {
   userId: string;
 }
 
+interface ForumTopic {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
+interface Bookmark {
+  id: string;
+  created_at: string;
+  forum_topics: ForumTopic;
+}
+
 export const UserActivity = ({ userId }: UserActivityProps) => {
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ["user-comments", userId],
@@ -38,9 +50,9 @@ export const UserActivity = ({ userId }: UserActivityProps) => {
         .from("bookmarks")
         .select(`
           *,
-          forum_topics:forum_topics!inner (
-            title,
+          forum_topics!inner (
             id,
+            title,
             created_at
           )
         `)
@@ -49,7 +61,7 @@ export const UserActivity = ({ userId }: UserActivityProps) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Bookmark[];
     },
   });
 

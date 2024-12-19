@@ -35,7 +35,7 @@ export const TopicHeader = ({ topic }: TopicHeaderProps) => {
         .eq("user_id", user.id)
         .eq("target_id", topic.id)
         .eq("target_type", "forum_topic")
-        .single();
+        .maybeSingle();
 
       setIsBookmarked(!!data);
     };
@@ -97,6 +97,7 @@ export const TopicHeader = ({ topic }: TopicHeaderProps) => {
         });
       }
     } catch (err) {
+      console.error("Error managing bookmark:", err);
       toast({
         variant: "destructive",
         description: "Error al gestionar el marcador",
