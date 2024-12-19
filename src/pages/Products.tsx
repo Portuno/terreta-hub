@@ -10,6 +10,7 @@ import { Footer } from "@/components/Footer";
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Stats } from "@/components/Stats";
 
 interface Profile {
   username: string;
