@@ -5,7 +5,7 @@ import { UserBadge } from "@/components/profile/UserBadge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TopicHeaderProps {
   topic: {
@@ -23,6 +23,25 @@ interface TopicHeaderProps {
 export const TopicHeader = ({ topic }: TopicHeaderProps) => {
   const { toast } = useToast();
   const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    const checkIfBookmarked = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("bookmarks")
+        .select()
+        .eq("user_id", user.id)
+        .eq("target_id", topic.id)
+        .eq("target_type", "forum_topic")
+        .single();
+
+      setIsBookmarked(!!data);
+    };
+
+    checkIfBookmarked();
+  }, [topic.id]);
 
   const handleShare = async () => {
     try {
@@ -49,22 +68,38 @@ export const TopicHeader = ({ topic }: TopicHeaderProps) => {
         return;
       }
 
-      const { error } = await supabase.from("bookmarks").insert({
-        user_id: user.id,
-        target_id: topic.id,
-        target_type: "forum_topic",
-      });
+      if (isBookmarked) {
+        const { error } = await supabase
+          .from("bookmarks")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("target_id", topic.id)
+          .eq("target_type", "forum_topic");
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setIsBookmarked(true);
-      toast({
-        description: "Tema guardado en marcadores",
-      });
+        setIsBookmarked(false);
+        toast({
+          description: "Tema eliminado de marcadores",
+        });
+      } else {
+        const { error } = await supabase.from("bookmarks").insert({
+          user_id: user.id,
+          target_id: topic.id,
+          target_type: "forum_topic",
+        });
+
+        if (error) throw error;
+
+        setIsBookmarked(true);
+        toast({
+          description: "Tema guardado en marcadores",
+        });
+      }
     } catch (err) {
       toast({
         variant: "destructive",
-        description: "Error al guardar el tema",
+        description: "Error al gestionar el marcador",
       });
     }
   };
@@ -104,9 +139,8 @@ export const TopicHeader = ({ topic }: TopicHeaderProps) => {
             variant="ghost"
             size="sm"
             onClick={handleBookmark}
-            disabled={isBookmarked}
           >
-            <Bookmark className="h-4 w-4 mr-2" />
+            <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? "fill-current" : ""}`} />
             {isBookmarked ? "Guardado" : "Guardar"}
           </Button>
         </div>
