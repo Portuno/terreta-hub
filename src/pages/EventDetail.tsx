@@ -6,9 +6,9 @@ import { Calendar, MapPin, Users, Check, HelpCircle, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { CommentForm } from "@/components/products/CommentForm";
 import { toast } from "sonner";
+import { EventActions } from "@/components/events/EventActions";
 import {
   Select,
   SelectContent,
@@ -174,15 +174,40 @@ const EventDetail = () => {
     (a) => a.status === "not_attending"
   ).length || 0;
 
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return false;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
+
+      return data?.role === "ADMIN";
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto py-8 px-4 pt-16">
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {event.title}
-            </h1>
+            <div className="flex justify-between items-start mb-2">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {event.title}
+              </h1>
+              {isAdmin && (
+                <EventActions
+                  eventId={event.id}
+                  eventTitle={event.title}
+                  isAdmin={isAdmin}
+                />
+              )}
+            </div>
             
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
               <Calendar size={16} />

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,8 +8,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Resource {
   id: string;
@@ -34,6 +37,9 @@ interface ResourceListProps {
 export const ResourceList = ({ category, icon, title, resources, isAdmin, onResourceDeleted }: ResourceListProps) => {
   const { toast } = useToast();
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resourceToDelete, setResourceToDelete] = useState<Resource | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleDeleteResource = async (id: string) => {
     try {
@@ -49,6 +55,9 @@ export const ResourceList = ({ category, icon, title, resources, isAdmin, onReso
         description: "Recurso eliminado correctamente",
       });
       onResourceDeleted();
+      setDeleteDialogOpen(false);
+      setResourceToDelete(null);
+      setConfirmDelete(false);
     } catch (error) {
       console.error("Error deleting resource:", error);
       toast({
@@ -65,6 +74,12 @@ export const ResourceList = ({ category, icon, title, resources, isAdmin, onReso
     } else {
       setSelectedResource(resource);
     }
+  };
+
+  const openDeleteDialog = (resource: Resource) => {
+    setResourceToDelete(resource);
+    setDeleteDialogOpen(true);
+    setConfirmDelete(false);
   };
 
   return (
@@ -92,7 +107,10 @@ export const ResourceList = ({ category, icon, title, resources, isAdmin, onReso
                 variant="ghost"
                 size="icon"
                 className="opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => handleDeleteResource(resource.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDeleteDialog(resource);
+                }}
               >
                 <Trash2 className="w-4 h-4 text-destructive" />
               </Button>
@@ -146,6 +164,48 @@ export const ResourceList = ({ category, icon, title, resources, isAdmin, onReso
               </>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 mb-4">
+              ¿Estás seguro de que deseas eliminar el recurso "{resourceToDelete?.title}"? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="confirm-delete"
+                checked={confirmDelete}
+                onCheckedChange={(checked) => setConfirmDelete(checked as boolean)}
+              />
+              <Label htmlFor="confirm-delete">
+                Confirmo que quiero eliminar este recurso permanentemente
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setResourceToDelete(null);
+                setConfirmDelete(false);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => resourceToDelete && handleDeleteResource(resourceToDelete.id)}
+              disabled={!confirmDelete}
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
