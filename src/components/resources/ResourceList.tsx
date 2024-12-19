@@ -60,7 +60,7 @@ export const ResourceList = ({ category, icon, title, resources, isAdmin, onReso
   };
 
   const handleResourceClick = (resource: Resource) => {
-    if (resource.resource_type === 'link' && resource.url) {
+    if (resource.url) {
       window.open(resource.url, '_blank');
     } else {
       setSelectedResource(resource);
@@ -83,7 +83,7 @@ export const ResourceList = ({ category, icon, title, resources, isAdmin, onReso
               className="flex-1 text-left flex items-center gap-2 hover:text-primary"
             >
               <span>{resource.title}</span>
-              {resource.resource_type === 'link' && (
+              {resource.url && (
                 <ExternalLink className="w-4 h-4 inline-block" />
               )}
             </button>
