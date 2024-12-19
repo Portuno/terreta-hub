@@ -71,7 +71,12 @@ export const ResourceList = ({
 
   const handleResourceClick = (resource: Resource) => {
     if (resource.url) {
-      window.open(resource.url, '_blank');
+      // Ensure the URL has a protocol
+      let urlToOpen = resource.url;
+      if (!urlToOpen.startsWith('http://') && !urlToOpen.startsWith('https://')) {
+        urlToOpen = 'https://' + urlToOpen;
+      }
+      window.open(urlToOpen, '_blank');
     } else {
       setSelectedResource(resource);
     }
