@@ -2,22 +2,12 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
-import { Calendar, MapPin, Users, Check, HelpCircle, X } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CommentForm } from "@/components/products/CommentForm";
 import { toast } from "sonner";
-import { EventActions } from "@/components/events/EventActions";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { EventHeader } from "@/components/events/EventHeader";
+import { EventLocation } from "@/components/events/EventLocation";
+import { EventAttendance } from "@/components/events/EventAttendance";
+import { EventComments } from "@/components/events/EventComments";
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -108,28 +98,19 @@ const EventDetail = () => {
     },
   });
 
-  const commentMutation = useMutation({
-    mutationFn: async (content: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No autenticado");
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return false;
 
-      const { error } = await supabase
-        .from("event_comments")
-        .insert({
-          event_id: id,
-          user_id: user.id,
-          content,
-        });
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
 
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["event", id] });
-      toast.success("Comentario añadido");
-    },
-    onError: (error) => {
-      console.error("Error al añadir comentario:", error);
-      toast.error("Error al añadir el comentario");
+      return data?.role === "ADMIN";
     },
   });
 
@@ -174,21 +155,9 @@ const EventDetail = () => {
     (a) => a.status === "not_attending"
   ).length || 0;
 
-  const { data: isAdmin } = useQuery({
-    queryKey: ["isAdmin"],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return false;
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
-
-      return data?.role === "ADMIN";
-    },
-  });
+  const confirmedAttendees = event.event_attendances?.filter(
+    (a) => a.is_public && a.status === "attending"
+  ) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -196,176 +165,37 @@ const EventDetail = () => {
       <main className="container mx-auto py-8 px-4 pt-16">
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex justify-between items-start mb-2">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {event.title}
-              </h1>
-              {isAdmin && (
-                <EventActions
-                  eventId={event.id}
-                  eventTitle={event.title}
-                  isAdmin={isAdmin}
-                />
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-              <Calendar size={16} />
-              <span>
-                {format(new Date(event.event_date), "PPP 'a las' p", {
-                  locale: es,
-                })}
-              </span>
-            </div>
+            <EventHeader
+              title={event.title}
+              eventDate={event.event_date}
+              eventId={event.id}
+              isAdmin={isAdmin || false}
+            />
 
             <p className="text-gray-600 mb-6">{event.description}</p>
 
-            <div className="flex items-start gap-4 mb-6">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <MapPin size={16} />
-                <a
-                  href={event.location_link || `https://maps.google.com/?q=${event.location}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  {event.location}
-                </a>
-              </div>
-            </div>
+            <EventLocation
+              location={event.location}
+              locationLink={event.location_link}
+              locationCoordinates={event.location_coordinates}
+            />
 
-            {event.location_coordinates && (
-              <div className="h-64 bg-gray-100 rounded-lg mb-6">
-                <iframe
-                  title="Ubicación del evento"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBLCQr3lBQUxFzTc4IxSpDyPNpKlFvJQLY&q=${event.location}`}
-                  allowFullScreen
-                  className="rounded-lg"
-                />
-              </div>
-            )}
-
-            <div className="border-t pt-6">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">Asistencia</h2>
-                  <div className="space-y-1 text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <Check size={16} className="text-green-500" />
-                      <span>{attendeesCount} asistirán</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <HelpCircle size={16} className="text-yellow-500" />
-                      <span>{maybeCount} tal vez</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <X size={16} className="text-red-500" />
-                      <span>{notAttendingCount} no asistirán</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Select
-                    value={userAttendance?.status || ""}
-                    onValueChange={(value) =>
-                      attendanceMutation.mutate({
-                        status: value,
-                        isPublic: userAttendance?.is_public ?? true,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="¿Asistirás?" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="attending">Asistiré</SelectItem>
-                      <SelectItem value="maybe">Tal vez</SelectItem>
-                      <SelectItem value="not_attending">No asistiré</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {userAttendance && (
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="public-attendance"
-                        checked={userAttendance.is_public}
-                        onCheckedChange={(checked) =>
-                          attendanceMutation.mutate({
-                            status: userAttendance.status,
-                            isPublic: checked,
-                          })
-                        }
-                      />
-                      <Label htmlFor="public-attendance">Mostrar mi asistencia públicamente</Label>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold">Asistentes confirmados</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {event.event_attendances
-                    ?.filter((a) => a.is_public && a.status === "attending")
-                    .map((attendance) => (
-                      <div
-                        key={attendance.profiles.username}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-                      >
-                        <img
-                          src={
-                            attendance.profiles.avatar_url ||
-                            "/placeholder.svg"
-                          }
-                          alt={attendance.profiles.username}
-                          className="w-8 h-8 rounded-full"
-                        />
-                        <span className="text-sm text-gray-600">
-                          {attendance.profiles.username}
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
+            <EventAttendance
+              attendeesCount={attendeesCount}
+              maybeCount={maybeCount}
+              notAttendingCount={notAttendingCount}
+              userAttendance={userAttendance}
+              onAttendanceChange={(status, isPublic) =>
+                attendanceMutation.mutate({ status, isPublic })
+              }
+              attendees={confirmedAttendees}
+            />
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Comentarios</h2>
-            <div className="space-y-6">
-              <CommentForm
-                onSubmit={(content) => commentMutation.mutate(content)}
-                placeholder="Escribe un comentario sobre el evento..."
-              />
-
-              <div className="space-y-4">
-                {event.event_comments
-                  ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                  .map((comment) => (
-                    <div key={comment.id} className="border-b pb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <img
-                          src={comment.profiles.avatar_url || "/placeholder.svg"}
-                          alt={comment.profiles.username}
-                          className="w-6 h-6 rounded-full"
-                        />
-                        <span className="font-medium">{comment.profiles.username}</span>
-                        <span className="text-sm text-gray-500">
-                          {format(new Date(comment.created_at), "d 'de' MMMM 'a las' p", {
-                            locale: es,
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-gray-600">{comment.content}</p>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
+          <EventComments
+            eventId={event.id}
+            comments={event.event_comments || []}
+          />
         </div>
       </main>
     </div>
