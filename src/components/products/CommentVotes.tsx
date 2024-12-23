@@ -11,6 +11,7 @@ interface CommentVotesProps {
   downvotes: number;
   userVote?: boolean | null;
   type: 'forum_comment' | 'product_comment';
+  onVote?: (voteType: boolean) => void;
 }
 
 export const CommentVotes = ({ 
@@ -18,7 +19,8 @@ export const CommentVotes = ({
   upvotes, 
   downvotes, 
   userVote, 
-  type 
+  type,
+  onVote 
 }: CommentVotesProps) => {
   const voteBalance = upvotes - downvotes;
   const { toast } = useToast();
@@ -81,6 +83,11 @@ export const CommentVotes = ({
       }
     },
     onSuccess: () => {
+      // Notify parent component about vote change if callback exists
+      if (onVote) {
+        onVote(userVote === undefined ? true : !userVote);
+      }
+      
       queryClient.invalidateQueries({ queryKey: [type === 'forum_comment' ? "forum-comments" : "product-comments"] });
       toast({
         description: "Tu voto ha sido registrado",
