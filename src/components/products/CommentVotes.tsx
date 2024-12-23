@@ -10,7 +10,6 @@ interface CommentVotesProps {
   upvotes: number;
   downvotes: number;
   userVote?: boolean | null;
-  onVote: (voteType: boolean) => void;
   type: 'forum_comment' | 'product_comment';
 }
 
@@ -30,11 +29,14 @@ export const CommentVotes = ({
 
   const voteMutation = useMutation({
     mutationFn: async (voteType: boolean) => {
+      console.log('Registrando voto:', { commentId, voteType, type });
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       // Si ya existe un voto del mismo tipo, lo eliminamos
       if (userVote === voteType) {
+        console.log('Eliminando voto existente del mismo tipo');
         const { error: deleteError } = await supabase
           .from(type === 'forum_comment' ? "forum_votes" : "product_comment_votes")
           .delete()
@@ -46,6 +48,7 @@ export const CommentVotes = ({
       }
 
       // Eliminar voto existente si hay
+      console.log('Eliminando votos previos si existen');
       const { error: deleteError } = await supabase
         .from(type === 'forum_comment' ? "forum_votes" : "product_comment_votes")
         .delete()
@@ -56,6 +59,7 @@ export const CommentVotes = ({
 
       // Insertar nuevo voto si es diferente al anterior
       if (userVote !== voteType) {
+        console.log('Insertando nuevo voto');
         const voteData = type === 'forum_comment' 
           ? {
               target_id: commentId,
@@ -82,7 +86,8 @@ export const CommentVotes = ({
         description: "Tu voto ha sido registrado",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error al votar:', error);
       toast({
         variant: "destructive",
         description: "Error al registrar el voto",

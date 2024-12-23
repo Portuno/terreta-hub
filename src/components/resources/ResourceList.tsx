@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResourceItem } from "./ResourceItem";
 import { DeleteResourceDialog } from "./DeleteResourceDialog";
 import { ResourceDetailsDialog } from "./ResourceDetailsDialog";
+import { ResourceEditDialog } from "./ResourceEditDialog";
 
 interface Resource {
   id: string;
@@ -15,6 +16,7 @@ interface Resource {
   content_format?: string;
   duration?: string;
   resource_type: string;
+  user_id: string;
 }
 
 interface ResourceListProps {
@@ -37,6 +39,7 @@ export const ResourceList = ({
   const { toast } = useToast();
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [resourceToDelete, setResourceToDelete] = useState<Resource | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -71,7 +74,6 @@ export const ResourceList = ({
 
   const handleResourceClick = (resource: Resource) => {
     if (resource.url) {
-      // Ensure the URL has a protocol
       let urlToOpen = resource.url;
       if (!urlToOpen.startsWith('http://') && !urlToOpen.startsWith('https://')) {
         urlToOpen = 'https://' + urlToOpen;
@@ -86,6 +88,11 @@ export const ResourceList = ({
     setResourceToDelete(resource);
     setDeleteDialogOpen(true);
     setConfirmDelete(false);
+  };
+
+  const openEditDialog = (resource: Resource) => {
+    setSelectedResource(resource);
+    setEditDialogOpen(true);
   };
 
   const filteredResources = resources.filter(
@@ -109,6 +116,7 @@ export const ResourceList = ({
             isAdmin={isAdmin}
             onResourceClick={handleResourceClick}
             onDeleteClick={openDeleteDialog}
+            onEditClick={openEditDialog}
           />
         ))}
       </ul>
@@ -125,6 +133,13 @@ export const ResourceList = ({
         confirmDelete={confirmDelete}
         onConfirmChange={setConfirmDelete}
         onDelete={handleDeleteResource}
+      />
+
+      <ResourceEditDialog
+        isOpen={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        resource={selectedResource}
+        onResourceUpdated={onResourceDeleted}
       />
     </div>
   );
