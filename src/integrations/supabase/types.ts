@@ -137,35 +137,47 @@ export type Database = {
       }
       events: {
         Row: {
+          available_tickets: number | null
           created_at: string
           description: string
           event_date: string
           id: string
+          is_paid: boolean
           location: string
           location_coordinates: unknown | null
           location_link: string | null
+          max_tickets: number | null
+          ticket_price: number | null
           title: string
           user_id: string
         }
         Insert: {
+          available_tickets?: number | null
           created_at?: string
           description: string
           event_date: string
           id?: string
+          is_paid?: boolean
           location: string
           location_coordinates?: unknown | null
           location_link?: string | null
+          max_tickets?: number | null
+          ticket_price?: number | null
           title: string
           user_id: string
         }
         Update: {
+          available_tickets?: number | null
           created_at?: string
           description?: string
           event_date?: string
           id?: string
+          is_paid?: boolean
           location?: string
           location_coordinates?: unknown | null
           location_link?: string | null
+          max_tickets?: number | null
+          ticket_price?: number | null
           title?: string
           user_id?: string
         }

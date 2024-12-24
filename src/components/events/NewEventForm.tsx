@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 interface NewEventFormProps {
@@ -16,13 +18,17 @@ interface EventFormData {
   description: string;
   location: string;
   event_date: string;
+  is_paid: boolean;
+  ticket_price?: number;
+  max_tickets?: number;
 }
 
 export const NewEventForm = ({ onSuccess }: NewEventFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { register, handleSubmit, formState: { errors } } = useForm<EventFormData>();
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<EventFormData>();
 
   const onSubmit = async (data: EventFormData) => {
     setIsSubmitting(true);
@@ -30,12 +36,17 @@ export const NewEventForm = ({ onSuccess }: NewEventFormProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No hay usuario autenticado");
 
+      const eventData = {
+        ...data,
+        user_id: user.id,
+        is_paid: isPaid,
+        ticket_price: isPaid ? data.ticket_price : null,
+        available_tickets: data.max_tickets || null,
+      };
+
       const { error } = await supabase
         .from("events")
-        .insert({
-          ...data,
-          user_id: user.id,
-        });
+        .insert(eventData);
 
       if (error) throw error;
 
@@ -98,6 +109,45 @@ export const NewEventForm = ({ onSuccess }: NewEventFormProps) => {
         />
         {errors.event_date && (
           <p className="text-sm text-red-500 mt-1">{errors.event_date.message}</p>
+        )}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="is-paid"
+          checked={isPaid}
+          onCheckedChange={setIsPaid}
+        />
+        <Label htmlFor="is-paid">Evento de pago</Label>
+      </div>
+
+      {isPaid && (
+        <div>
+          <Input
+            type="number"
+            step="0.01"
+            {...register("ticket_price", {
+              required: isPaid ? "El precio es requerido" : false,
+              min: { value: 0, message: "El precio debe ser mayor a 0" }
+            })}
+            placeholder="Precio del ticket"
+          />
+          {errors.ticket_price && (
+            <p className="text-sm text-red-500 mt-1">{errors.ticket_price.message}</p>
+          )}
+        </div>
+      )}
+
+      <div>
+        <Input
+          type="number"
+          {...register("max_tickets", {
+            min: { value: 1, message: "Debe haber al menos 1 ticket disponible" }
+          })}
+          placeholder="Cantidad máxima de tickets (opcional)"
+        />
+        {errors.max_tickets && (
+          <p className="text-sm text-red-500 mt-1">{errors.max_tickets.message}</p>
         )}
       </div>
 
