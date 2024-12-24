@@ -11,12 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 const EventDetail = () => {
   const { id } = useParams();
-  const [isLoading, setIsLoading] = useState(true);
   const [event, setEvent] = useState(null);
   const [ticketBatches, setTicketBatches] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["event", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,12 +27,8 @@ const EventDetail = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      setEvent(data);
-      setIsLoading(false);
-    },
-    onError: () => {
-      setIsLoading(false);
+    onSettled: (data) => {
+      if (data) setEvent(data);
     },
   });
 
@@ -48,8 +43,8 @@ const EventDetail = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      setTicketBatches(data);
+    onSettled: (data) => {
+      if (data) setTicketBatches(data);
     },
   });
 
