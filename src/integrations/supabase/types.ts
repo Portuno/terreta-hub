@@ -135,6 +135,102 @@ export type Database = {
           },
         ]
       }
+      event_payment_methods: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          event_id: string
+          id: string
+          is_active: boolean | null
+          payment_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          event_id: string
+          id?: string
+          is_active?: boolean | null
+          payment_type: string
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          event_id?: string
+          id?: string
+          is_active?: boolean | null
+          payment_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_payment_methods_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_payments: {
+        Row: {
+          amount: number
+          batch_id: string
+          created_at: string | null
+          event_id: string
+          id: string
+          payment_data: Json | null
+          payment_type: string
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          batch_id: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          payment_data?: Json | null
+          payment_type: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          batch_id?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          payment_data?: Json | null
+          payment_type?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_payments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "event_ticket_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_ticket_batches: {
         Row: {
           available_tickets: number
