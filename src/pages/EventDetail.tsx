@@ -21,16 +21,32 @@ const EventDetail = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("*")
+        .select(`
+          *,
+          event_comments (
+            id,
+            content,
+            created_at,
+            profiles (
+              username,
+              avatar_url
+            )
+          )
+        `)
         .eq("id", id)
         .single();
 
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      if (data) setEvent(data);
-    },
+    meta: {
+      onSuccess: (data) => {
+        if (data) {
+          setEvent(data);
+          setComments(data.event_comments || []);
+        }
+      }
+    }
   });
 
   useQuery({
@@ -44,25 +60,11 @@ const EventDetail = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      if (data) setTicketBatches(data);
-    },
-  });
-
-  useQuery({
-    queryKey: ["eventComments", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("event_comments")
-        .select("*")
-        .eq("event_id", id);
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      if (data) setComments(data);
-    },
+    meta: {
+      onSuccess: (data) => {
+        if (data) setTicketBatches(data);
+      }
+    }
   });
 
   return (
@@ -129,7 +131,7 @@ const EventDetail = () => {
                     ))}
                   </div>
 
-                  <EventAttendance event={event} />
+                  <EventAttendance eventId={event.id} />
                 </div>
               </div>
             </div>
