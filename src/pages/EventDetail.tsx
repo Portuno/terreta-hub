@@ -1,203 +1,135 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Navbar } from "../components/Navbar";
+import { EventHeader } from "../components/events/EventHeader";
+import { EventLocation } from "../components/events/EventLocation";
+import { EventComments } from "../components/events/EventComments";
+import { EventAttendance } from "../components/events/EventAttendance";
+import { PaymentMethodSelector } from "../components/events/PaymentMethodSelector";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { EventHeader } from "@/components/events/EventHeader";
-import { EventLocation } from "@/components/events/EventLocation";
-import { EventAttendance } from "@/components/events/EventAttendance";
-import { EventComments } from "@/components/events/EventComments";
 
 const EventDetail = () => {
   const { id } = useParams();
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(true);
+  const [event, setEvent] = useState(null);
+  const [ticketBatches, setTicketBatches] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const { data: event, isLoading } = useQuery({
+  useQuery({
     queryKey: ["event", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select(`
-          *,
-          event_attendances (
-            status,
-            is_public,
-            profiles:user_id (
-              username,
-              avatar_url
-            )
-          ),
-          event_comments (
-            id,
-            content,
-            created_at,
-            profiles:user_id (
-              username,
-              avatar_url
-            )
-          )
-        `)
+        .select("*")
         .eq("id", id)
         .single();
 
       if (error) throw error;
       return data;
     },
+    onSuccess: (data) => {
+      setEvent(data);
+      setIsLoading(false);
+    },
+    onError: () => {
+      setIsLoading(false);
+    },
   });
 
-  const { data: userAttendance } = useQuery({
-    queryKey: ["attendance", id],
+  useQuery({
+    queryKey: ["ticketBatches", id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-
       const { data, error } = await supabase
-        .from("event_attendances")
+        .from("event_ticket_batches")
         .select("*")
-        .eq("event_id", id)
-        .eq("user_id", user.id)
-        .maybeSingle();
+        .eq("event_id", id);
 
       if (error) throw error;
       return data;
     },
-  });
-
-  const attendanceMutation = useMutation({
-    mutationFn: async ({ status, isPublic }: { status: string; isPublic: boolean }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No autenticado");
-
-      if (userAttendance) {
-        const { error } = await supabase
-          .from("event_attendances")
-          .update({ status, is_public: isPublic })
-          .eq("id", userAttendance.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("event_attendances")
-          .insert({
-            event_id: id,
-            user_id: user.id,
-            status,
-            is_public: isPublic,
-          });
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["event", id] });
-      queryClient.invalidateQueries({ queryKey: ["attendance", id] });
-      toast.success("Tu asistencia ha sido actualizada");
-    },
-    onError: (error) => {
-      console.error("Error al actualizar asistencia:", error);
-      toast.error("Error al actualizar tu asistencia");
+    onSuccess: (data) => {
+      setTicketBatches(data);
     },
   });
-
-  const { data: isAdmin } = useQuery({
-    queryKey: ["isAdmin"],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return false;
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
-
-      return data?.role === "ADMIN";
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="container mx-auto py-8 px-4 pt-16">
-          <div className="max-w-3xl mx-auto">
-            <Skeleton className="h-8 w-2/3 mb-4" />
-            <Skeleton className="h-4 w-1/3 mb-8" />
-            <Skeleton className="h-32 w-full mb-6" />
-            <Skeleton className="h-20 w-full" />
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (!event) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="container mx-auto py-8 px-4 pt-16">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold">Evento no encontrado</h1>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  const attendeesCount = event.event_attendances?.filter(
-    (a) => a.status === "attending"
-  ).length || 0;
-
-  const maybeCount = event.event_attendances?.filter(
-    (a) => a.status === "maybe"
-  ).length || 0;
-
-  const notAttendingCount = event.event_attendances?.filter(
-    (a) => a.status === "not_attending"
-  ).length || 0;
-
-  const confirmedAttendees = event.event_attendances?.filter(
-    (a) => a.is_public && a.status === "attending"
-  ) || [];
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto py-8 px-4 pt-16">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <EventHeader
-              title={event.title}
-              eventDate={event.event_date}
-              eventId={event.id}
-              isAdmin={isAdmin || false}
-            />
+      <div className="pt-16">
+        <main className="container mx-auto py-8 px-4">
+          {isLoading ? (
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          ) : event ? (
+            <div className="space-y-6">
+              <EventHeader
+                title={event.title}
+                eventDate={event.event_date}
+                eventId={event.id}
+                isAdmin={isAdmin}
+              />
 
-            <p className="text-gray-600 mb-6">{event.description}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 space-y-6">
+                  <div className="prose max-w-none">
+                    <p>{event.description}</p>
+                  </div>
 
-            <EventLocation
-              location={event.location}
-              locationLink={event.location_link}
-              locationCoordinates={event.location_coordinates?.toString()}
-            />
+                  <EventLocation
+                    location={event.location}
+                    locationLink={event.location_link}
+                  />
 
-            <EventAttendance
-              attendeesCount={attendeesCount}
-              maybeCount={maybeCount}
-              notAttendingCount={notAttendingCount}
-              userAttendance={userAttendance}
-              onAttendanceChange={(status, isPublic) =>
-                attendanceMutation.mutate({ status, isPublic })
-              }
-              attendees={confirmedAttendees}
-            />
-          </div>
+                  <EventComments eventId={event.id} />
+                </div>
 
-          <EventComments
-            eventId={event.id}
-            comments={event.event_comments || []}
-          />
-        </div>
-      </main>
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                    <h3 className="text-lg font-semibold mb-4">Tickets</h3>
+                    {ticketBatches?.map((batch) => (
+                      <div
+                        key={batch.id}
+                        className="p-4 border rounded-lg mb-4 last:mb-0"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">
+                            Lote {batch.batch_number}
+                          </span>
+                          <span className="text-lg font-semibold">
+                            {batch.price}€
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-500 mb-4">
+                          {batch.available_tickets} tickets disponibles
+                        </div>
+                        {batch.available_tickets > 0 && (
+                          <PaymentMethodSelector
+                            eventId={event.id}
+                            batchId={batch.id}
+                            price={batch.price}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <EventAttendance eventId={event.id} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Evento no encontrado
+              </h2>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 };
