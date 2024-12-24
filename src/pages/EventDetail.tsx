@@ -177,7 +177,7 @@ const EventDetail = () => {
             <EventLocation
               location={event.location}
               locationLink={event.location_link}
-              locationCoordinates={event.location_coordinates}
+              locationCoordinates={event.location_coordinates?.toString()}
             />
 
             <EventAttendance
