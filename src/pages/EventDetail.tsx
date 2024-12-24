@@ -14,6 +14,7 @@ const EventDetail = () => {
   const [event, setEvent] = useState(null);
   const [ticketBatches, setTicketBatches] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [comments, setComments] = useState([]);
 
   const { isLoading } = useQuery({
     queryKey: ["event", id],
@@ -27,7 +28,7 @@ const EventDetail = () => {
       if (error) throw error;
       return data;
     },
-    onSettled: (data) => {
+    onSuccess: (data) => {
       if (data) setEvent(data);
     },
   });
@@ -43,8 +44,24 @@ const EventDetail = () => {
       if (error) throw error;
       return data;
     },
-    onSettled: (data) => {
+    onSuccess: (data) => {
       if (data) setTicketBatches(data);
+    },
+  });
+
+  useQuery({
+    queryKey: ["eventComments", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("event_comments")
+        .select("*")
+        .eq("event_id", id);
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data) setComments(data);
     },
   });
 
@@ -79,7 +96,7 @@ const EventDetail = () => {
                     locationLink={event.location_link}
                   />
 
-                  <EventComments eventId={event.id} />
+                  <EventComments eventId={event.id} comments={comments} />
                 </div>
 
                 <div className="space-y-6">
@@ -112,7 +129,7 @@ const EventDetail = () => {
                     ))}
                   </div>
 
-                  <EventAttendance eventId={event.id} />
+                  <EventAttendance event={event} />
                 </div>
               </div>
             </div>

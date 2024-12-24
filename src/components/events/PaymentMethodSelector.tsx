@@ -48,6 +48,9 @@ export const PaymentMethodSelector = ({ eventId, batchId, price }: PaymentMethod
   const handleStripePayment = async () => {
     try {
       setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuario no autenticado');
+
       const { data: { url }, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { eventId, batchId },
       });
@@ -71,6 +74,9 @@ export const PaymentMethodSelector = ({ eventId, batchId, price }: PaymentMethod
   const handleBankTransfer = async () => {
     try {
       setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuario no autenticado');
+
       const { data: payment, error: paymentError } = await supabase
         .from('event_payments')
         .insert({
@@ -78,7 +84,8 @@ export const PaymentMethodSelector = ({ eventId, batchId, price }: PaymentMethod
           batch_id: batchId,
           payment_type: 'bank_transfer',
           amount: price,
-          status: 'pending'
+          status: 'pending',
+          user_id: user.id
         })
         .select()
         .single();
@@ -105,6 +112,9 @@ export const PaymentMethodSelector = ({ eventId, batchId, price }: PaymentMethod
   const handleUSDTPayment = async () => {
     try {
       setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuario no autenticado');
+      
       const method = paymentMethods?.find(m => m.payment_type === 'usdt');
       
       const { data: payment, error: paymentError } = await supabase
@@ -115,6 +125,7 @@ export const PaymentMethodSelector = ({ eventId, batchId, price }: PaymentMethod
           payment_type: 'usdt',
           amount: price,
           status: 'pending',
+          user_id: user.id,
           payment_data: {
             network: method?.network,
             wallet_address: method?.wallet_address
