@@ -142,7 +142,9 @@ export type Database = {
           event_id: string
           id: string
           is_active: boolean | null
+          network: string | null
           payment_type: string
+          wallet_address: string | null
         }
         Insert: {
           created_at?: string | null
@@ -150,7 +152,9 @@ export type Database = {
           event_id: string
           id?: string
           is_active?: boolean | null
+          network?: string | null
           payment_type: string
+          wallet_address?: string | null
         }
         Update: {
           created_at?: string | null
@@ -158,7 +162,9 @@ export type Database = {
           event_id?: string
           id?: string
           is_active?: boolean | null
+          network?: string | null
           payment_type?: string
+          wallet_address?: string | null
         }
         Relationships: [
           {
