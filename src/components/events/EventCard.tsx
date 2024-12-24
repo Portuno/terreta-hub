@@ -1,4 +1,4 @@
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, MapPin, Ticket } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Link } from "react-router-dom";
@@ -10,6 +10,10 @@ interface EventCardProps {
     description: string;
     location: string;
     event_date: string;
+    is_paid: boolean;
+    ticket_price: number | null;
+    available_tickets: number | null;
+    max_tickets: number | null;
   };
 }
 
@@ -21,6 +25,27 @@ export const EventCard = ({ event }: EventCardProps) => {
     >
       <h3 className="text-xl font-semibold text-gray-900">{event.title}</h3>
       <p className="mt-2 text-gray-600 line-clamp-2">{event.description}</p>
+      
+      {/* Precio y tickets */}
+      <div className="mt-4 flex items-center gap-2">
+        <span className={`px-2 py-1 rounded-full text-sm ${
+          event.is_paid 
+            ? "bg-blue-100 text-blue-800" 
+            : "bg-green-100 text-green-800"
+        }`}>
+          {event.is_paid 
+            ? `${event.ticket_price}€` 
+            : "Gratuito"}
+        </span>
+        
+        {event.max_tickets && (
+          <span className="flex items-center gap-1 text-sm text-gray-500">
+            <Ticket size={16} />
+            {event.available_tickets} / {event.max_tickets} disponibles
+          </span>
+        )}
+      </div>
+
       <div className="mt-4 space-y-2">
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Calendar size={16} />
