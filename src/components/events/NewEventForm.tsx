@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { PlusCircle, Trash2 } from "lucide-react";
 
 interface NewEventFormProps {
   onSuccess: () => void;
@@ -19,16 +20,33 @@ interface EventFormData {
   location: string;
   event_date: string;
   is_paid: boolean;
-  ticket_price?: number;
-  max_tickets?: number;
+  ticket_batches?: {
+    price: number;
+    total_tickets: number;
+  }[];
 }
 
 export const NewEventForm = ({ onSuccess }: NewEventFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [ticketBatches, setTicketBatches] = useState([{ price: 0, total_tickets: 0 }]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<EventFormData>();
+  const { register, handleSubmit, formState: { errors } } = useForm<EventFormData>();
+
+  const addTicketBatch = () => {
+    setTicketBatches([...ticketBatches, { price: 0, total_tickets: 0 }]);
+  };
+
+  const removeTicketBatch = (index: number) => {
+    setTicketBatches(ticketBatches.filter((_, i) => i !== index));
+  };
+
+  const updateBatchField = (index: number, field: 'price' | 'total_tickets', value: number) => {
+    const newBatches = [...ticketBatches];
+    newBatches[index] = { ...newBatches[index], [field]: value };
+    setTicketBatches(newBatches);
+  };
 
   const onSubmit = async (data: EventFormData) => {
     setIsSubmitting(true);
@@ -36,19 +54,35 @@ export const NewEventForm = ({ onSuccess }: NewEventFormProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No hay usuario autenticado");
 
-      const eventData = {
-        ...data,
-        user_id: user.id,
-        is_paid: isPaid,
-        ticket_price: isPaid ? data.ticket_price : null,
-        available_tickets: data.max_tickets || null,
-      };
-
-      const { error } = await supabase
+      // Crear el evento
+      const { data: event, error: eventError } = await supabase
         .from("events")
-        .insert(eventData);
+        .insert({
+          ...data,
+          user_id: user.id,
+          is_paid: isPaid,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (eventError) throw eventError;
+
+      // Si es un evento de pago, crear los lotes de tickets
+      if (isPaid && event) {
+        const batchesData = ticketBatches.map((batch, index) => ({
+          event_id: event.id,
+          price: batch.price,
+          total_tickets: batch.total_tickets,
+          available_tickets: batch.total_tickets,
+          batch_number: index + 1,
+        }));
+
+        const { error: batchError } = await supabase
+          .from("event_ticket_batches")
+          .insert(batchesData);
+
+        if (batchError) throw batchError;
+      }
 
       toast({
         title: "¡Éxito!",
@@ -122,34 +156,67 @@ export const NewEventForm = ({ onSuccess }: NewEventFormProps) => {
       </div>
 
       {isPaid && (
-        <div>
-          <Input
-            type="number"
-            step="0.01"
-            {...register("ticket_price", {
-              required: isPaid ? "El precio es requerido" : false,
-              min: { value: 0, message: "El precio debe ser mayor a 0" }
-            })}
-            placeholder="Precio del ticket"
-          />
-          {errors.ticket_price && (
-            <p className="text-sm text-red-500 mt-1">{errors.ticket_price.message}</p>
-          )}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Lotes de tickets</h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addTicketBatch}
+              className="flex items-center gap-2"
+            >
+              <PlusCircle size={16} />
+              Añadir lote
+            </Button>
+          </div>
+
+          {ticketBatches.map((batch, index) => (
+            <div key={index} className="space-y-2 p-4 border rounded-lg">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Lote #{index + 1}</h4>
+                {index > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeTicketBatch(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor={`price-${index}`}>Precio (€)</Label>
+                  <Input
+                    id={`price-${index}`}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={batch.price}
+                    onChange={(e) => updateBatchField(index, 'price', parseFloat(e.target.value))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`tickets-${index}`}>Cantidad de tickets</Label>
+                  <Input
+                    id={`tickets-${index}`}
+                    type="number"
+                    min="1"
+                    value={batch.total_tickets}
+                    onChange={(e) => updateBatchField(index, 'total_tickets', parseInt(e.target.value))}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
-
-      <div>
-        <Input
-          type="number"
-          {...register("max_tickets", {
-            min: { value: 1, message: "Debe haber al menos 1 ticket disponible" }
-          })}
-          placeholder="Cantidad máxima de tickets (opcional)"
-        />
-        {errors.max_tickets && (
-          <p className="text-sm text-red-500 mt-1">{errors.max_tickets.message}</p>
-        )}
-      </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? "Creando..." : "Crear Evento"}

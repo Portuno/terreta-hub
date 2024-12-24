@@ -21,6 +21,23 @@ export const UpcomingEvent = () => {
     },
   });
 
+  const { data: ticketBatches } = useQuery({
+    queryKey: ["upcomingEventTickets", events?.[0]?.id],
+    queryFn: async () => {
+      if (!events?.[0]?.id) return null;
+      const { data, error } = await supabase
+        .from("event_ticket_batches")
+        .select("*")
+        .eq("event_id", events[0].id)
+        .eq("is_active", true)
+        .order("batch_number", { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!events?.[0]?.id,
+  });
+
   if (isLoading) {
     return <div className="h-48 bg-gray-100 animate-pulse rounded-lg"></div>;
   }
@@ -34,6 +51,7 @@ export const UpcomingEvent = () => {
   }
 
   const event = events[0];
+  const currentBatch = ticketBatches?.find(batch => batch.available_tickets > 0);
 
   return (
     <Link
@@ -51,14 +69,16 @@ export const UpcomingEvent = () => {
             : "bg-green-100 text-green-800"
         }`}>
           {event.is_paid 
-            ? `${event.ticket_price}€` 
+            ? currentBatch 
+              ? `${currentBatch.price}€ (Lote ${currentBatch.batch_number})` 
+              : "Agotado"
             : "Gratuito"}
         </span>
         
-        {event.max_tickets && (
+        {currentBatch && (
           <span className="flex items-center gap-1 text-sm text-gray-500">
             <Ticket size={16} />
-            {event.available_tickets} / {event.max_tickets} disponibles
+            {currentBatch.available_tickets} disponibles
           </span>
         )}
       </div>

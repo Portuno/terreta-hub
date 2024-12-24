@@ -2,6 +2,8 @@ import { Calendar, MapPin, Ticket } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EventCardProps {
   event: {
@@ -11,13 +13,27 @@ interface EventCardProps {
     location: string;
     event_date: string;
     is_paid: boolean;
-    ticket_price: number | null;
-    available_tickets: number | null;
-    max_tickets: number | null;
   };
 }
 
 export const EventCard = ({ event }: EventCardProps) => {
+  const { data: ticketBatches } = useQuery({
+    queryKey: ["eventTickets", event.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("event_ticket_batches")
+        .select("*")
+        .eq("event_id", event.id)
+        .eq("is_active", true)
+        .order("batch_number", { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const currentBatch = ticketBatches?.find(batch => batch.available_tickets > 0);
+
   return (
     <Link
       to={`/eventos/${event.id}`}
@@ -34,14 +50,16 @@ export const EventCard = ({ event }: EventCardProps) => {
             : "bg-green-100 text-green-800"
         }`}>
           {event.is_paid 
-            ? `${event.ticket_price}€` 
+            ? currentBatch 
+              ? `${currentBatch.price}€ (Lote ${currentBatch.batch_number})` 
+              : "Agotado"
             : "Gratuito"}
         </span>
         
-        {event.max_tickets && (
+        {currentBatch && (
           <span className="flex items-center gap-1 text-sm text-gray-500">
             <Ticket size={16} />
-            {event.available_tickets} / {event.max_tickets} disponibles
+            {currentBatch.available_tickets} disponibles
           </span>
         )}
       </div>

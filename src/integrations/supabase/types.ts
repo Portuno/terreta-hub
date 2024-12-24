@@ -135,9 +135,56 @@ export type Database = {
           },
         ]
       }
+      event_ticket_batches: {
+        Row: {
+          available_tickets: number
+          batch_number: number
+          created_at: string | null
+          event_id: string
+          id: string
+          is_active: boolean | null
+          price: number
+          total_tickets: number
+        }
+        Insert: {
+          available_tickets: number
+          batch_number: number
+          created_at?: string | null
+          event_id: string
+          id?: string
+          is_active?: boolean | null
+          price: number
+          total_tickets: number
+        }
+        Update: {
+          available_tickets?: number
+          batch_number?: number
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          is_active?: boolean | null
+          price?: number
+          total_tickets?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_ticket_batches_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_event"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
-          available_tickets: number | null
           created_at: string
           description: string
           event_date: string
@@ -146,13 +193,10 @@ export type Database = {
           location: string
           location_coordinates: unknown | null
           location_link: string | null
-          max_tickets: number | null
-          ticket_price: number | null
           title: string
           user_id: string
         }
         Insert: {
-          available_tickets?: number | null
           created_at?: string
           description: string
           event_date: string
@@ -161,13 +205,10 @@ export type Database = {
           location: string
           location_coordinates?: unknown | null
           location_link?: string | null
-          max_tickets?: number | null
-          ticket_price?: number | null
           title: string
           user_id: string
         }
         Update: {
-          available_tickets?: number | null
           created_at?: string
           description?: string
           event_date?: string
@@ -176,8 +217,6 @@ export type Database = {
           location?: string
           location_coordinates?: unknown | null
           location_link?: string | null
-          max_tickets?: number | null
-          ticket_price?: number | null
           title?: string
           user_id?: string
         }
