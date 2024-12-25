@@ -19,9 +19,10 @@ interface EventCardProps {
 }
 
 export const EventCard = ({ event, isAdmin = false }: EventCardProps) => {
-  const { data: ticketBatches } = useQuery({
+  const { data: ticketBatches, isLoading } = useQuery({
     queryKey: ["eventTickets", event.id],
     queryFn: async () => {
+      console.log("Fetching ticket batches for event:", event.id);
       const { data, error } = await supabase
         .from("event_ticket_batches")
         .select("*")
@@ -29,12 +30,19 @@ export const EventCard = ({ event, isAdmin = false }: EventCardProps) => {
         .eq("is_active", true)
         .order("batch_number", { ascending: true });
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching ticket batches:", error);
+        throw error;
+      }
+
+      console.log("Received ticket batches:", data);
+      return data || [];
     },
   });
 
-  const currentBatch = ticketBatches?.find(batch => batch.available_tickets > 0);
+  const currentBatch = Array.isArray(ticketBatches) && ticketBatches.length > 0
+    ? ticketBatches.find(batch => batch.available_tickets > 0)
+    : null;
 
   return (
     <div className="relative">
