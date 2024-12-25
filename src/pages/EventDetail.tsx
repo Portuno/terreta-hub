@@ -18,68 +18,94 @@ const EventDetail = () => {
   const { data: profile } = useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return null;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          console.log("No session found");
+          return null;
+        }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
+        console.log("Fetching profile for user:", session.user.id);
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
+        if (error) {
+          console.error("Error fetching profile:", error);
+          return null;
+        }
+
+        console.log("Profile data:", data);
+        const isUserAdmin = data?.role === "ADMIN";
+        setIsAdmin(isUserAdmin);
+        return data;
+      } catch (error) {
+        console.error("Error in profile query:", error);
         return null;
       }
-
-      const isUserAdmin = data?.role === "ADMIN";
-      setIsAdmin(isUserAdmin);
-      return data;
     },
   });
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ["event", id],
     queryFn: async () => {
-      console.log("Fetching event with ID:", id);
-      const { data, error } = await supabase
-        .from("events")
-        .select(`
-          *,
-          event_comments (
-            id,
-            content,
-            created_at,
-            profiles (
-              username,
-              avatar_url
+      try {
+        console.log("Fetching event with ID:", id);
+        const { data, error } = await supabase
+          .from("events")
+          .select(`
+            *,
+            event_comments (
+              id,
+              content,
+              created_at,
+              profiles (
+                username,
+                avatar_url
+              )
             )
-          )
-        `)
-        .eq("id", id)
-        .maybeSingle();
+          `)
+          .eq("id", id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching event:", error);
+        if (error) {
+          console.error("Error fetching event:", error);
+          throw error;
+        }
+        
+        console.log("Event data received:", data);
+        return data;
+      } catch (error) {
+        console.error("Error in event query:", error);
         throw error;
       }
-      
-      console.log("Event data received:", data);
-      return data;
     },
   });
 
   const { data: ticketBatches } = useQuery({
     queryKey: ["ticketBatches", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("event_ticket_batches")
-        .select("*")
-        .eq("event_id", id)
-        .order('batch_number', { ascending: true });
+      try {
+        console.log("Fetching ticket batches for event:", id);
+        const { data, error } = await supabase
+          .from("event_ticket_batches")
+          .select("*")
+          .eq("event_id", id)
+          .order('batch_number', { ascending: true });
 
-      if (error) throw error;
-      return data;
+        if (error) {
+          console.error("Error fetching ticket batches:", error);
+          throw error;
+        }
+
+        console.log("Ticket batches received:", data);
+        return data;
+      } catch (error) {
+        console.error("Error in ticket batches query:", error);
+        throw error;
+      }
     },
     enabled: !!id,
   });
