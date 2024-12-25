@@ -2,11 +2,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
-import { EventHeader } from "../components/events/EventHeader";
-import { EventLocation } from "../components/events/EventLocation";
+import { EventInfo } from "../components/events/EventInfo";
 import { EventComments } from "../components/events/EventComments";
-import { EventAttendance } from "../components/events/EventAttendance";
-import { PaymentMethodSelector } from "../components/events/PaymentMethodSelector";
+import { EventRegistration } from "../components/events/EventRegistration";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -14,30 +12,21 @@ const EventDetail = () => {
   const { id } = useParams();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Verificar si el usuario es administrador
   const { data: profile } = useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          console.log("No session found");
-          return null;
-        }
+        if (!session?.user) return null;
 
-        console.log("Fetching profile for user:", session.user.id);
         const { data, error } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
           .single();
 
-        if (error) {
-          console.error("Error fetching profile:", error);
-          return null;
-        }
+        if (error) throw error;
 
-        console.log("Profile data:", data);
         const isUserAdmin = data?.role === "ADMIN";
         setIsAdmin(isUserAdmin);
         return data;
@@ -52,7 +41,6 @@ const EventDetail = () => {
     queryKey: ["event", id],
     queryFn: async () => {
       try {
-        console.log("Fetching event with ID:", id);
         const { data, error } = await supabase
           .from("events")
           .select(`
@@ -70,44 +58,13 @@ const EventDetail = () => {
           .eq("id", id)
           .maybeSingle();
 
-        if (error) {
-          console.error("Error fetching event:", error);
-          throw error;
-        }
-        
-        console.log("Event data received:", data);
+        if (error) throw error;
         return data;
       } catch (error) {
         console.error("Error in event query:", error);
         throw error;
       }
     },
-  });
-
-  const { data: ticketBatches } = useQuery({
-    queryKey: ["ticketBatches", id],
-    queryFn: async () => {
-      try {
-        console.log("Fetching ticket batches for event:", id);
-        const { data, error } = await supabase
-          .from("event_ticket_batches")
-          .select("*")
-          .eq("event_id", id)
-          .order('batch_number', { ascending: true });
-
-        if (error) {
-          console.error("Error fetching ticket batches:", error);
-          throw error;
-        }
-
-        console.log("Ticket batches received:", data);
-        return data;
-      } catch (error) {
-        console.error("Error in ticket batches query:", error);
-        throw error;
-      }
-    },
-    enabled: !!id,
   });
 
   if (isLoading) {
@@ -143,22 +100,7 @@ const EventDetail = () => {
       <div className="pt-16 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
           <div className="space-y-6">
-            <EventHeader
-              title={event.title}
-              eventDate={event.event_date}
-              eventId={event.id}
-              isAdmin={isAdmin}
-            />
-
-            <div className="prose max-w-none">
-              <p>{event.description}</p>
-            </div>
-
-            <EventLocation
-              location={event.location}
-              locationLink={event.location_link}
-            />
-
+            <EventInfo event={event} isAdmin={isAdmin} />
             <EventComments 
               eventId={event.id} 
               comments={event.event_comments || []} 
@@ -166,36 +108,7 @@ const EventDetail = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">Tickets</h3>
-              {ticketBatches?.map((batch) => (
-                <div
-                  key={batch.id}
-                  className="p-4 border rounded-lg mb-4 last:mb-0"
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">
-                      Lote {batch.batch_number}
-                    </span>
-                    <span className="text-lg font-semibold">
-                      {batch.price}€
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-500 mb-4">
-                    {batch.available_tickets} tickets disponibles
-                  </div>
-                  {batch.available_tickets > 0 && (
-                    <PaymentMethodSelector
-                      eventId={event.id}
-                      batchId={batch.id}
-                      price={batch.price}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <EventAttendance eventId={event.id} />
+            <EventRegistration eventId={event.id} />
           </div>
         </div>
       </div>
