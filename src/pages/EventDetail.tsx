@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { EventInfo } from "../components/events/EventInfo";
 import { EventComments } from "../components/events/EventComments";
-import { EventRegistration } from "../components/events/EventRegistration";
+import { EventAttendance } from "../components/events/EventAttendance";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -108,7 +108,7 @@ const EventDetail = () => {
           </div>
 
           <div className="space-y-6">
-            <EventRegistration eventId={event.id} />
+            <EventAttendance eventId={event.id} />
           </div>
         </div>
       </div>
