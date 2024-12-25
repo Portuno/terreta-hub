@@ -8,13 +8,37 @@ import { EventComments } from "../components/events/EventComments";
 import { EventAttendance } from "../components/events/EventAttendance";
 import { PaymentMethodSelector } from "../components/events/PaymentMethodSelector";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const EventDetail = () => {
   const { id } = useParams();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [comments, setComments] = useState([]);
 
-  const { data: event, isLoading } = useQuery({
+  // Verificar si el usuario es administrador
+  const { data: profile } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return null;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+
+      const isUserAdmin = data?.role === "ADMIN";
+      setIsAdmin(isUserAdmin);
+      return data;
+    },
+  });
+
+  const { data: event, isLoading, error } = useQuery({
     queryKey: ["event", id],
     queryFn: async () => {
       console.log("Fetching event with ID:", id);
@@ -33,7 +57,7 @@ const EventDetail = () => {
           )
         `)
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching event:", error);
@@ -51,7 +75,8 @@ const EventDetail = () => {
       const { data, error } = await supabase
         .from("event_ticket_batches")
         .select("*")
-        .eq("event_id", id);
+        .eq("event_id", id)
+        .order('batch_number', { ascending: true });
 
       if (error) throw error;
       return data;
@@ -64,17 +89,13 @@ const EventDetail = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-64 bg-gray-200 rounded"></div>
-          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     );
   }
 
-  if (!event) {
+  if (error || !event) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
