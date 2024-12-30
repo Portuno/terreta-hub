@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { EventInfo } from "../components/events/EventInfo";
 import { EventComments } from "../components/events/EventComments";
@@ -10,7 +10,11 @@ import { Loader2 } from "lucide-react";
 
 const EventDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Add console logs for debugging
+  console.log("Event ID from params:", id);
 
   const { data: profile } = useQuery({
     queryKey: ["userProfile"],
@@ -41,6 +45,10 @@ const EventDetail = () => {
     queryKey: ["event", id],
     queryFn: async () => {
       try {
+        if (!id) {
+          throw new Error("No event ID provided");
+        }
+
         const { data, error } = await supabase
           .from("events")
           .select(`
@@ -58,13 +66,23 @@ const EventDetail = () => {
           .eq("id", id)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
+
+        if (!data) {
+          navigate("/eventos");
+          throw new Error("Event not found");
+        }
+
         return data;
       } catch (error) {
         console.error("Error in event query:", error);
         throw error;
       }
     },
+    retry: false,
   });
 
   if (isLoading) {
