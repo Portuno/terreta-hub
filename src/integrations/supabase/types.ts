@@ -1010,6 +1010,144 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          additional_spaces: string[] | null
+          address: string
+          advanced_features: string[] | null
+          agent_details: Json | null
+          availability_date: string | null
+          basic_features: string[] | null
+          bathrooms: number
+          bedrooms: number
+          built_area: number | null
+          community_features: string[] | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string
+          contact_whatsapp: string | null
+          created_at: string
+          created_by: string
+          crypto_payment_enabled: boolean | null
+          crypto_price_enabled: boolean | null
+          description: string
+          documents: string[] | null
+          garden_area: number | null
+          id: string
+          is_draft: boolean | null
+          is_published: boolean | null
+          location_coordinates: unknown
+          neighborhood: string | null
+          other_type_description: string | null
+          photos: string[]
+          postal_code: string
+          preferred_contact_method: string
+          price: number
+          price_negotiable: boolean | null
+          property_type: Database["public"]["Enums"]["property_type"]
+          special_notes: string | null
+          terrace_area: number | null
+          title: string
+          total_area: number
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string
+          updated_by: string
+          usable_area: number | null
+          video_url: string | null
+          virtual_tour_url: string | null
+        }
+        Insert: {
+          additional_spaces?: string[] | null
+          address: string
+          advanced_features?: string[] | null
+          agent_details?: Json | null
+          availability_date?: string | null
+          basic_features?: string[] | null
+          bathrooms: number
+          bedrooms: number
+          built_area?: number | null
+          community_features?: string[] | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string
+          contact_whatsapp?: string | null
+          created_at?: string
+          created_by: string
+          crypto_payment_enabled?: boolean | null
+          crypto_price_enabled?: boolean | null
+          description: string
+          documents?: string[] | null
+          garden_area?: number | null
+          id?: string
+          is_draft?: boolean | null
+          is_published?: boolean | null
+          location_coordinates: unknown
+          neighborhood?: string | null
+          other_type_description?: string | null
+          photos: string[]
+          postal_code: string
+          preferred_contact_method: string
+          price: number
+          price_negotiable?: boolean | null
+          property_type: Database["public"]["Enums"]["property_type"]
+          special_notes?: string | null
+          terrace_area?: number | null
+          title: string
+          total_area: number
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          updated_by: string
+          usable_area?: number | null
+          video_url?: string | null
+          virtual_tour_url?: string | null
+        }
+        Update: {
+          additional_spaces?: string[] | null
+          address?: string
+          advanced_features?: string[] | null
+          agent_details?: Json | null
+          availability_date?: string | null
+          basic_features?: string[] | null
+          bathrooms?: number
+          bedrooms?: number
+          built_area?: number | null
+          community_features?: string[] | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string
+          contact_whatsapp?: string | null
+          created_at?: string
+          created_by?: string
+          crypto_payment_enabled?: boolean | null
+          crypto_price_enabled?: boolean | null
+          description?: string
+          documents?: string[] | null
+          garden_area?: number | null
+          id?: string
+          is_draft?: boolean | null
+          is_published?: boolean | null
+          location_coordinates?: unknown
+          neighborhood?: string | null
+          other_type_description?: string | null
+          photos?: string[]
+          postal_code?: string
+          preferred_contact_method?: string
+          price?: number
+          price_negotiable?: boolean | null
+          property_type?: Database["public"]["Enums"]["property_type"]
+          special_notes?: string | null
+          terrace_area?: number | null
+          title?: string
+          total_area?: number
+          transaction_type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          updated_by?: string
+          usable_area?: number | null
+          video_url?: string | null
+          virtual_tour_url?: string | null
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           category: string
@@ -1068,6 +1206,14 @@ export type Database = {
       }
     }
     Enums: {
+      property_type:
+        | "APARTMENT"
+        | "HOUSE"
+        | "VILLA"
+        | "COMMERCIAL"
+        | "LAND"
+        | "OTHER"
+      transaction_type: "SALE" | "RENT" | "RENT_TO_OWN"
       user_role:
         | "Normal"
         | "Admin"

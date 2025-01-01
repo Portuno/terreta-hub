@@ -10,11 +10,11 @@ import { MobileMenu } from "./MobileMenu";
 import { SearchBar } from "./SearchBar";
 
 const menuItems = [
-  { name: "Inicio", path: "/" },
-  { name: "Productos", path: "/productos" },
-  { name: "Recursos", path: "/recursos" },
-  { name: "Eventos", path: "/eventos" },
-  { name: "Foro", path: "/foro" },
+  { name: "Home", path: "/" },
+  { name: "Products", path: "/productos" },
+  { name: "Resources", path: "/recursos" },
+  { name: "Events", path: "/eventos" },
+  { name: "Forum", path: "/foro" },
   { name: "FAQ", path: "/faq" },
 ];
 
@@ -64,13 +64,13 @@ export const Navbar = () => {
     if (error) {
       toast({
         title: "Error",
-        description: "No se pudo cerrar sesión",
+        description: "Could not sign out",
         variant: "destructive",
       });
     } else {
       toast({
-        title: "¡Hasta pronto!",
-        description: "Has cerrado sesión correctamente",
+        title: "See you soon!",
+        description: "You have successfully signed out",
       });
       setSession(null);
     }
@@ -111,7 +111,7 @@ export const Navbar = () => {
                 onClick={() => setShowAuthModal(true)}
                 className="bg-primary text-white hover:bg-primary-dark transition-colors"
               >
-                Iniciar Sesión
+                Sign In
               </Button>
             )}
           </div>

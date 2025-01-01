@@ -28,7 +28,7 @@ export const ProductFilters = ({
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              Filtros
+              Filters
               {selectedCategories.length > 0 && (
                 <Badge variant="secondary" className="ml-1">
                   {selectedCategories.length}
@@ -39,7 +39,7 @@ export const ProductFilters = ({
           <PopoverContent className="w-80">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-medium">Categorías</h3>
+                <h3 className="font-medium">Categories</h3>
                 {selectedCategories.length > 0 && (
                   <Button
                     variant="ghost"
@@ -47,7 +47,7 @@ export const ProductFilters = ({
                     onClick={onClearFilters}
                     className="h-8 px-2 text-xs"
                   >
-                    Limpiar filtros
+                    Clear filters
                   </Button>
                 )}
               </div>

@@ -15,14 +15,14 @@ const Index = () => {
             {/* Hero Section */}
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-                Impulsamos el talento de Valencia al futuro
+                Empowering Valencia's Talent into the Future
               </h1>
               <p className="text-xl text-gray-600 mb-8">
-                Descubre, conecta y crece con la comunidad de innovación valenciana
+                Discover, Connect, and Grow with Valencia's Innovation Community
               </p>
               <Button asChild size="lg" className="bg-primary hover:bg-primary-dark">
                 <Link to="/productos/nuevo">
-                  Crea tu proyecto
+                  Create Project
                 </Link>
               </Button>
             </div>
@@ -32,11 +32,11 @@ const Index = () => {
               {/* Left Column */}
               <div className="space-y-8">
                 <section>
-                  <h2 className="text-2xl font-semibold mb-6">Top Productos de la Semana</h2>
+                  <h2 className="text-2xl font-semibold mb-6">Top Products of the Week</h2>
                   <TopProducts />
                 </section>
                 <section>
-                  <h2 className="text-2xl font-semibold mb-6">Próximo Evento</h2>
+                  <h2 className="text-2xl font-semibold mb-6">Next Event</h2>
                   <UpcomingEvent />
                 </section>
               </div>
@@ -44,7 +44,7 @@ const Index = () => {
               {/* Right Column */}
               <div>
                 <section>
-                  <h2 className="text-2xl font-semibold mb-6">Temas Trending</h2>
+                  <h2 className="text-2xl font-semibold mb-6">Trending Topics</h2>
                   <TrendingTopics />
                 </section>
               </div>

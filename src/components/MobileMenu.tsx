@@ -49,14 +49,14 @@ export const MobileMenu = ({
               className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
               onClick={() => setIsOpen(false)}
             >
-              Ver Perfil
+              View Profile
             </Link>
             <Link
               to="/configuraciones"
               className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-primary hover:bg-gray-100"
               onClick={() => setIsOpen(false)}
             >
-              Configuraciones
+              Settings
             </Link>
             <button
               onClick={() => {
@@ -65,7 +65,7 @@ export const MobileMenu = ({
               }}
               className="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50"
             >
-              Cerrar Sesión
+              Sign Out
             </button>
           </div>
         ) : (
@@ -76,7 +76,7 @@ export const MobileMenu = ({
             }}
             className="w-full mt-2"
           >
-            Iniciar Sesión
+            Sign In
           </Button>
         )}
       </div>

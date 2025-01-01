@@ -54,7 +54,7 @@ const Products = () => {
 
       return (data as any[]).map(product => ({
         ...product,
-        profile: product.profile || { username: 'Usuario Anónimo' }
+        profile: product.profile || { username: 'Anonymous User' }
       }));
     },
   });
@@ -97,7 +97,7 @@ const Products = () => {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(shareData.url);
-        toast.success("Enlace copiado al portapapeles");
+        toast.success("Link copied to clipboard");
       }
     } catch (error) {
       console.error("Error sharing:", error);
@@ -111,12 +111,12 @@ const Products = () => {
         <main className="container mx-auto py-8 px-4">
           <div className="animate-fade-in space-y-6">
             <div className="flex justify-between items-center">
-              <h1 className="text-4xl font-bold text-foreground">Productos</h1>
+              <h1 className="text-4xl font-bold text-foreground">Products</h1>
               <Button 
                 onClick={() => navigate("/productos/nuevo")} 
                 className="bg-primary hover:bg-primary-dark text-white font-bold"
               >
-                Crear Proyecto
+                Create Project
               </Button>
             </div>
 
@@ -167,8 +167,8 @@ const Products = () => {
                         ))}
                       </div>
                       <div className="flex justify-between items-center text-sm text-gray-500">
-                        <span>Por {product.profile?.username}</span>
-                        <span>{product.views || 0} visualizaciones</span>
+                        <span>By {product.profile?.username}</span>
+                        <span>{product.views || 0} views</span>
                       </div>
                     </Link>
                   </div>
@@ -176,7 +176,7 @@ const Products = () => {
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">
-                No hay productos disponibles en este momento.
+                No products available at this time.
               </p>
             )}
             
