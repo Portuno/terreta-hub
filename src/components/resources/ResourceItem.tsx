@@ -1,16 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Trash2, ExternalLink, Edit } from "lucide-react";
+import { Resource } from "@/types/resources";
 
 interface ResourceItemProps {
-  resource: {
-    id: string;
-    title: string;
-    url?: string;
-  };
+  resource: Resource;
   isAdmin: boolean;
-  onResourceClick: (resource: any) => void;
-  onDeleteClick: (resource: any) => void;
-  onEditClick: (resource: any) => void;
+  onResourceClick: (resource: Resource) => void;
+  onDeleteClick: (resource: Resource) => void;
+  onEditClick: (resource: Resource) => void;
 }
 
 export const ResourceItem = ({ 

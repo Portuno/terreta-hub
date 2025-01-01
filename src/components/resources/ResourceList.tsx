@@ -5,19 +5,7 @@ import { ResourceItem } from "./ResourceItem";
 import { DeleteResourceDialog } from "./DeleteResourceDialog";
 import { ResourceDetailsDialog } from "./ResourceDetailsDialog";
 import { ResourceEditDialog } from "./ResourceEditDialog";
-
-interface Resource {
-  id: string;
-  title: string;
-  description: string;
-  url?: string;
-  instructor?: string;
-  course_syllabus?: string;
-  content_format?: string;
-  duration?: string;
-  resource_type: string;
-  user_id: string;
-}
+import { Resource } from "@/types/resources";
 
 interface ResourceListProps {
   category: string;
@@ -55,8 +43,8 @@ export const ResourceList = ({
       if (error) throw error;
 
       toast({
-        title: "Éxito",
-        description: "Recurso eliminado correctamente",
+        title: "Success",
+        description: "Resource deleted successfully",
       });
       onResourceDeleted();
       setDeleteDialogOpen(false);
@@ -66,7 +54,7 @@ export const ResourceList = ({
       console.error("Error deleting resource:", error);
       toast({
         title: "Error",
-        description: "No se pudo eliminar el recurso",
+        description: "Could not delete the resource",
         variant: "destructive",
       });
     }

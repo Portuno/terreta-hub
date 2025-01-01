@@ -2,52 +2,16 @@ import { useState } from "react";
 import { Navbar } from "../components/Navbar";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { Sidebar } from "../components/Sidebar";
-import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { ResourceDialog } from "@/components/resources/ResourceDialog";
 import { ResourcesHeader } from "@/components/resources/ResourcesHeader";
 import { ResourceGrid } from "@/components/resources/ResourceGrid";
+import { useResources } from "@/hooks/useResources";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Resources = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const { toast } = useToast();
-
-  const { data: userRole } = useQuery({
-    queryKey: ["userRole"],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      return profile?.role;
-    },
-  });
-
-  const { data: resources, refetch: refetchResources } = useQuery({
-    queryKey: ["resources"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("resources")
-        .select("*");
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar los recursos",
-          variant: "destructive",
-        });
-        return [];
-      }
-
-      return data || [];
-    },
-  });
+  const { data: userRole } = useUserRole();
+  const { data: resources, refetch: refetchResources } = useResources();
 
   const isAdmin = userRole === "ADMIN";
 
